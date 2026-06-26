@@ -196,10 +196,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('flow')"><span class="tab-dot"></span>검색표</button>
-  <button class="tab" onclick="switchTab('cards')"><span class="tab-dot"></span>문 카드</button>
-  <button class="tab" onclick="switchTab('quiz')"><span class="tab-dot"></span>퀴즈</button>
-  <button class="tab" onclick="switchTab('cheat')"><span class="tab-dot"></span>요약표</button>
+  <button class="tab active" data-tab="flow"><span class="tab-dot"></span>검색표</button>
+  <button class="tab" data-tab="cards"><span class="tab-dot"></span>문 카드</button>
+  <button class="tab" data-tab="quiz"><span class="tab-dot"></span>퀴즈</button>
+  <button class="tab" data-tab="cheat"><span class="tab-dot"></span>요약표</button>
 </div>
 
 <!-- ════════ FLOW ════════ -->
@@ -445,95 +445,105 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1
 </div>
 
 <script>
-function switchTab(id){
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
-  document.getElementById('panel-'+id).classList.add('active');
-  var tabs=document.querySelectorAll('.tab');
-  var map={flow:0,cards:1,quiz:2,cheat:3};
-  if(map[id]!==undefined)tabs[map[id]].classList.add('active');
-}
+(function(){
+  var QUIZ_BANK=[
+    {cat:"분기 질문",q:"배엽이 형성되지 않는 동물문은?",o:["해면동물문","자포동물문","편형동물문","극피동물문"],c:0,e:"해면동물문(Porifera)은 배엽 형성이 일어나지 않는 가장 원시적인 동물문이다."},
+    {cat:"분기 질문",q:"방사대칭이면서 2배엽인 동물문은?",o:["해면동물문","자포동물문","극피동물문","편형동물문"],c:1,e:"자포동물문(Cnidaria)은 방사대칭 + 2배엽. 극피동물은 후구동물이고 유생은 좌우대칭."},
+    {cat:"선구 vs 후구",q:"원구(原口)가 '입'이 되는 동물군은?",o:["후구동물","선구동물","방사대칭동물","무배엽동물"],c:1,e:"선구동물(Protostomia): 원구 → 입. 후구동물: 원구 → 항문."},
+    {cat:"선구 vs 후구",q:"원구(原口)가 '항문'이 되는 동물군은?",o:["선구동물","후구동물","탈피동물","촉수담륜동물"],c:1,e:"후구동물(Deuterostomia): 원구 → 항문, 입은 나중에 새로 형성."},
+    {cat:"형질",q:"자세포(쏘는 세포)를 가진 동물문은?",o:["해면동물문","편형동물문","자포동물문","환형동물문"],c:2,e:"자포동물문(Cnidaria)의 '자포'가 바로 자세포를 의미."},
+    {cat:"형질",q:"폐쇄혈관계를 가진 동물문은?",o:["절지동물문","환형동물문","선형동물문","연체동물문"],c:1,e:"환형동물문(Annelida)은 폐쇄혈관계. 절지동물은 개방혈관계."},
+    {cat:"형질",q:"수관계와 관족을 가진 동물문은?",o:["척삭동물문","자포동물문","극피동물문","연체동물문"],c:2,e:"극피동물문(Echinodermata)은 수관계와 관족을 이용해 이동."},
+    {cat:"형질",q:"키틴질 외골격 + 관절다리를 가진 동물문은?",o:["환형동물문","절지동물문","극피동물문","척삭동물문"],c:1,e:"절지동물문(Arthropoda)은 키틴질 외골격과 관절다리가 특징."},
+    {cat:"분류",q:"촉수담륜동물에 포함되지 않는 것은?",o:["편형동물문","연체동물문","환형동물문","절지동물문"],c:3,e:"절지동물문은 탈피동물(Ecdysozoa). 촉수담륜 = 편형·연체·환형."},
+    {cat:"분류",q:"탈피동물에 해당하는 것은?",o:["편형+연체","환형+자포","선형+절지","극피+척삭"],c:2,e:"탈피동물(Ecdysozoa) = 선형동물문 + 절지동물문."},
+    {cat:"분류",q:"후구동물에 속하는 문의 조합은?",o:["해면+자포","편형+환형","선형+절지","극피+척삭"],c:3,e:"후구동물 = 극피동물문 + 척삭동물문."},
+    {cat:"예시",q:"플라나리아가 속하는 동물문은?",o:["환형동물문","편형동물문","선형동물문","자포동물문"],c:1,e:"플라나리아는 편형동물문(Platyhelminthes)에 속하는 자유생활 편형동물."},
+    {cat:"예시",q:"문어와 오징어가 속하는 강(綱)은?",o:["복족강","이매패강","두족강","갑각강"],c:2,e:"문어·오징어는 연체동물문의 두족강(Cephalopoda)."},
+    {cat:"비교",q:"절지동물문의 혈관계는?",o:["폐쇄혈관계","개방혈관계","혈관계 없음","수관계"],c:1,e:"절지동물은 개방혈관계, 환형동물은 폐쇄혈관계."},
+    {cat:"비교",q:"척삭동물의 4대 특징이 아닌 것은?",o:["척삭","등쪽 신경다발","자세포","항문 뒤 꼬리"],c:2,e:"자세포는 자포동물 특징. 척삭 4대: 척삭, 등쪽 신경다발, 인두틈, 항문 뒤 꼬리."},
+    {cat:"비교",q:"해면동물의 섭식 방법은?",o:["자세포로 사냥","깃세포로 여과섭식","관족으로 포획","외투막으로 흡수"],c:1,e:"해면동물은 깃세포(choanocyte)로 여과섭식."},
+    {cat:"형질",q:"선형동물문에 없는 기관계는?",o:["순환계+호흡계","소화계+신경계","순환계+소화계","호흡계+신경계"],c:0,e:"선형동물문(Nematoda)은 순환계와 호흡계가 모두 없다."},
+    {cat:"형질",q:"극피동물의 유생과 성체 대칭성은?",o:["유생:방사/성체:좌우","유생:좌우/성체:방사","둘 다 방사","둘 다 좌우"],c:1,e:"극피동물은 유생=좌우대칭, 성체=방사대칭(5방사)."},
+    {cat:"분류",q:"동물 종의 약 80%를 차지하는 문은?",o:["연체동물문","척삭동물문","절지동물문","선형동물문"],c:2,e:"절지동물문은 곤충·거미·갑각류 등 전체 동물 종의 약 80%."},
+    {cat:"비교",q:"입과 항문이 하나(같음)인 문은?",o:["자포동물문","편형동물문","환형동물문","척삭동물문"],c:0,e:"자포동물문은 입=항문(하나). 편형동물문은 입O 항문X."}
+  ];
 
-var QUIZ_BANK=[
-  {cat:"분기 질문",q:"배엽이 형성되지 않는 동물문은?",o:["해면동물문","자포동물문","편형동물문","극피동물문"],c:0,e:"해면동물문(Porifera)은 배엽 형성이 일어나지 않는 가장 원시적인 동물문이다."},
-  {cat:"분기 질문",q:"방사대칭이면서 2배엽인 동물문은?",o:["해면동물문","자포동물문","극피동물문","편형동물문"],c:1,e:"자포동물문(Cnidaria)은 방사대칭 + 2배엽. 극피동물은 후구동물이고 유생은 좌우대칭."},
-  {cat:"선구 vs 후구",q:"원구(原口)가 '입'이 되는 동물군은?",o:["후구동물","선구동물","방사대칭동물","무배엽동물"],c:1,e:"선구동물(Protostomia): 원구 → 입. 후구동물: 원구 → 항문."},
-  {cat:"선구 vs 후구",q:"원구(原口)가 '항문'이 되는 동물군은?",o:["선구동물","후구동물","탈피동물","촉수담륜동물"],c:1,e:"후구동물(Deuterostomia): 원구 → 항문, 입은 나중에 새로 형성."},
-  {cat:"형질",q:"자세포(쏘는 세포)를 가진 동물문은?",o:["해면동물문","편형동물문","자포동물문","환형동물문"],c:2,e:"자포동물문(Cnidaria)의 '자포'가 바로 자세포를 의미."},
-  {cat:"형질",q:"폐쇄혈관계를 가진 동물문은?",o:["절지동물문","환형동물문","선형동물문","연체동물문"],c:1,e:"환형동물문(Annelida)은 폐쇄혈관계. 절지동물은 개방혈관계."},
-  {cat:"형질",q:"수관계와 관족을 가진 동물문은?",o:["척삭동물문","자포동물문","극피동물문","연체동물문"],c:2,e:"극피동물문(Echinodermata)은 수관계와 관족을 이용해 이동."},
-  {cat:"형질",q:"키틴질 외골격 + 관절다리를 가진 동물문은?",o:["환형동물문","절지동물문","극피동물문","척삭동물문"],c:1,e:"절지동물문(Arthropoda)은 키틴질 외골격과 관절다리가 특징."},
-  {cat:"분류",q:"촉수담륜동물에 포함되지 않는 것은?",o:["편형동물문","연체동물문","환형동물문","절지동물문"],c:3,e:"절지동물문은 탈피동물(Ecdysozoa). 촉수담륜 = 편형·연체·환형."},
-  {cat:"분류",q:"탈피동물에 해당하는 것은?",o:["편형+연체","환형+자포","선형+절지","극피+척삭"],c:2,e:"탈피동물(Ecdysozoa) = 선형동물문 + 절지동물문."},
-  {cat:"분류",q:"후구동물에 속하는 문의 조합은?",o:["해면+자포","편형+환형","선형+절지","극피+척삭"],c:3,e:"후구동물 = 극피동물문 + 척삭동물문."},
-  {cat:"예시",q:"플라나리아가 속하는 동물문은?",o:["환형동물문","편형동물문","선형동물문","자포동물문"],c:1,e:"플라나리아는 편형동물문(Platyhelminthes)에 속하는 자유생활 편형동물."},
-  {cat:"예시",q:"문어와 오징어가 속하는 강(綱)은?",o:["복족강","이매패강","두족강","갑각강"],c:2,e:"문어·오징어는 연체동물문의 두족강(Cephalopoda)."},
-  {cat:"비교",q:"절지동물문의 혈관계는?",o:["폐쇄혈관계","개방혈관계","혈관계 없음","수관계"],c:1,e:"절지동물은 개방혈관계, 환형동물은 폐쇄혈관계."},
-  {cat:"비교",q:"척삭동물의 4대 특징이 아닌 것은?",o:["척삭","등쪽 신경다발","자세포","항문 뒤 꼬리"],c:2,e:"자세포는 자포동물 특징. 척삭 4대: 척삭, 등쪽 신경다발, 인두틈, 항문 뒤 꼬리."},
-  {cat:"비교",q:"해면동물의 섭식 방법은?",o:["자세포로 사냥","깃세포로 여과섭식","관족으로 포획","외투막으로 흡수"],c:1,e:"해면동물은 깃세포(choanocyte)로 여과섭식."},
-  {cat:"형질",q:"선형동물문에 없는 기관계는?",o:["순환계+호흡계","소화계+신경계","순환계+소화계","호흡계+신경계"],c:0,e:"선형동물문(Nematoda)은 순환계와 호흡계가 모두 없다."},
-  {cat:"형질",q:"극피동물의 유생과 성체 대칭성은?",o:["유생:방사/성체:좌우","유생:좌우/성체:방사","둘 다 방사","둘 다 좌우"],c:1,e:"극피동물은 유생=좌우대칭, 성체=방사대칭(5방사)."},
-  {cat:"분류",q:"동물 종의 약 80%를 차지하는 문은?",o:["연체동물문","척삭동물문","절지동물문","선형동물문"],c:2,e:"절지동물문은 곤충·거미·갑각류 등 전체 동물 종의 약 80%."},
-  {cat:"비교",q:"입과 항문이 하나(같음)인 문은?",o:["자포동물문","편형동물문","환형동물문","척삭동물문"],c:0,e:"자포동물문은 입=항문(하나). 편형동물문은 입O 항문X."}
-];
+  /* Tab switching — event delegation */
+  document.addEventListener('click', function(e){
+    var tab = e.target.closest('[data-tab]');
+    if(tab){
+      var id = tab.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+      document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+      document.getElementById('panel-'+id).classList.add('active');
+      tab.classList.add('active');
+      return;
+    }
+    var opt = e.target.closest('[data-qi]');
+    if(opt){ pickAnswer(parseInt(opt.getAttribute('data-qi'))); return; }
+    var nxt = e.target.closest('[data-action="next"]');
+    if(nxt){ quizState.ci++; renderQuiz(); return; }
+    var rst = e.target.closest('[data-action="restart"]');
+    if(rst){ startQuiz(); return; }
+  });
 
-var quizState={qs:[],ci:0,sc:0,wr:0,ans:false};
-var quizRoot=document.getElementById('quiz-root');
+  var quizState={qs:[],ci:0,sc:0,wr:0,ans:false};
+  var quizRoot=document.getElementById('quiz-root');
 
-function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t}return b}
+  function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t}return b}
 
-function startQuiz(){
-  quizState.qs=shuffle(QUIZ_BANK).slice(0,10);
-  quizState.ci=0;quizState.sc=0;quizState.wr=0;quizState.ans=false;
-  renderQuiz();
-}
-
-function renderQuiz(){
-  var s=quizState;
-  if(s.ci>=s.qs.length){renderResult();return}
-  var q=s.qs[s.ci];
-  var keys=['A','B','C','D'];
-  var pct=Math.round((s.ci/s.qs.length)*100);
-  var h='<div class="quiz-progress"><div class="quiz-bar"><div class="quiz-fill" style="width:'+pct+'%"></div></div><div class="quiz-ptext">'+(s.ci+1)+' / '+s.qs.length+'</div></div>';
-  h+='<div class="quiz-score"><span class="qs-correct" id="qs-c">O '+s.sc+'</span><span class="qs-wrong" id="qs-w">X '+s.wr+'</span></div>';
-  h+='<div class="quiz-card"><div class="quiz-cat">'+q.cat+'</div><div class="quiz-q">'+q.q+'</div><div class="quiz-opts">';
-  for(var i=0;i<q.o.length;i++){
-    h+='<button class="quiz-opt" onclick="pickAnswer('+i+')" id="qo'+i+'"><span class="opt-key">'+keys[i]+'</span><span>'+q.o[i]+'</span></button>';
+  function startQuiz(){
+    quizState.qs=shuffle(QUIZ_BANK).slice(0,10);
+    quizState.ci=0;quizState.sc=0;quizState.wr=0;quizState.ans=false;
+    renderQuiz();
   }
-  h+='</div><div class="quiz-explain" id="qexp">'+q.e+'</div>';
-  h+='<button class="quiz-next" id="qnext" onclick="nextQ()">'+(s.ci<s.qs.length-1?'다음 문제 →':'결과 보기')+'</button></div>';
-  quizRoot.innerHTML=h;
-  s.ans=false;
-}
 
-function pickAnswer(idx){
-  var s=quizState;if(s.ans)return;s.ans=true;
-  var q=s.qs[s.ci];
-  var correct=idx===q.c;
-  if(correct)s.sc++;else s.wr++;
-  for(var i=0;i<q.o.length;i++){
-    var el=document.getElementById('qo'+i);
-    el.classList.add('answered');
-    if(i===q.c)el.classList.add('correct-answer');
-    else if(i===idx&&!correct)el.classList.add('wrong-answer');
-    else el.classList.add('dimmed');
+  function renderQuiz(){
+    var s=quizState;
+    if(s.ci>=s.qs.length){renderResult();return}
+    var q=s.qs[s.ci];
+    var keys=['A','B','C','D'];
+    var pct=Math.round((s.ci/s.qs.length)*100);
+    var h='<div class="quiz-progress"><div class="quiz-bar"><div class="quiz-fill" style="width:'+pct+'%"></div></div><div class="quiz-ptext">'+(s.ci+1)+' / '+s.qs.length+'</div></div>';
+    h+='<div class="quiz-score"><span class="qs-correct" id="qs-c">O '+s.sc+'</span><span class="qs-wrong" id="qs-w">X '+s.wr+'</span></div>';
+    h+='<div class="quiz-card"><div class="quiz-cat">'+q.cat+'</div><div class="quiz-q">'+q.q+'</div><div class="quiz-opts">';
+    for(var i=0;i<q.o.length;i++){
+      h+='<button class="quiz-opt" data-qi="'+i+'" id="qo'+i+'"><span class="opt-key">'+keys[i]+'</span><span>'+q.o[i]+'</span></button>';
+    }
+    h+='</div><div class="quiz-explain" id="qexp">'+q.e+'</div>';
+    h+='<button class="quiz-next" id="qnext" data-action="next">'+(s.ci<s.qs.length-1?'다음 문제 →':'결과 보기')+'</button></div>';
+    quizRoot.innerHTML=h;
+    s.ans=false;
   }
-  document.getElementById('qexp').classList.add('show');
-  document.getElementById('qnext').classList.add('show');
-  document.getElementById('qs-c').textContent='O '+s.sc;
-  document.getElementById('qs-w').textContent='X '+s.wr;
-}
 
-function nextQ(){quizState.ci++;renderQuiz()}
+  function pickAnswer(idx){
+    var s=quizState;if(s.ans)return;s.ans=true;
+    var q=s.qs[s.ci];
+    var correct=idx===q.c;
+    if(correct)s.sc++;else s.wr++;
+    for(var i=0;i<q.o.length;i++){
+      var el=document.getElementById('qo'+i);
+      el.classList.add('answered');
+      if(i===q.c)el.classList.add('correct-answer');
+      else if(i===idx&&!correct)el.classList.add('wrong-answer');
+      else el.classList.add('dimmed');
+    }
+    document.getElementById('qexp').classList.add('show');
+    document.getElementById('qnext').classList.add('show');
+    document.getElementById('qs-c').textContent='O '+s.sc;
+    document.getElementById('qs-w').textContent='X '+s.wr;
+  }
 
-function renderResult(){
-  var s=quizState;
-  var pct=Math.round((s.sc/s.qs.length)*100);
-  var msg=pct>=90?'Perfect!':pct>=70?'Almost there!':pct>=50?'Keep going!':'Try again!';
-  quizRoot.innerHTML='<div class="quiz-result"><div class="quiz-result-score">'+s.sc+' / '+s.qs.length+'</div><div class="quiz-result-text">'+pct+'% correct · '+msg+'</div><button class="quiz-restart" onclick="startQuiz()">다시 도전</button></div>';
-}
+  function renderResult(){
+    var s=quizState;
+    var pct=Math.round((s.sc/s.qs.length)*100);
+    var msg=pct>=90?'Perfect!':pct>=70?'Almost there!':pct>=50?'Keep going!':'Try again!';
+    quizRoot.innerHTML='<div class="quiz-result"><div class="quiz-result-score">'+s.sc+' / '+s.qs.length+'</div><div class="quiz-result-text">'+pct+'% correct · '+msg+'</div><button class="quiz-restart" data-action="restart">다시 도전</button></div>';
+  }
 
-startQuiz();
+  startQuiz();
+})();
 </script>
 </body>
 </html>
