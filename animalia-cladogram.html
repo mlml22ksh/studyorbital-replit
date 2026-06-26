@@ -3,877 +3,172 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>동물계 분류 · 암기 마스터</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>동물계 분류 마스터</title>
 <style>
 :root {
-  --bg: #0a0a0f;
-  --surface: #13131a;
-  --surface2: #1a1a24;
-  --surface3: #22222e;
-  --border: #2a2a3a;
-  --border2: #3a3a4e;
-  --ink: #e8e6f0;
-  --muted: #8888a0;
-  --faint: #555568;
+  --bg:#0a0a0f; --surface:#13131a; --surface2:#1a1a24; --surface3:#22222e;
+  --border:#2a2a3a; --border2:#3a3a4e;
+  --ink:#e8e6f0; --muted:#8888a0; --faint:#555568;
+  --basal:#7c8594; --radial:#e8a040;
+  --proto-loph:#e05a8a; --proto-ecdy:#c74040; --deutero:#4a9aee;
+  --accent:#a078f0; --accent-dim:#a078f020;
+  --correct:#40c880; --wrong:#e05050;
+  --mono:ui-monospace,'SF Mono',monospace;
+  --sans:system-ui,-apple-system,sans-serif;
+  --r:14px; --r2:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
 
-  --basal: #7c8594;
-  --basal-bg: #7c859412;
-  --radial: #e8a040;
-  --radial-bg: #e8a04012;
-  --proto-loph: #e05a8a;
-  --proto-loph-bg: #e05a8a12;
-  --proto-ecdy: #c74040;
-  --proto-ecdy-bg: #c7404012;
-  --deutero: #4a9aee;
-  --deutero-bg: #4a9aee12;
+.header{padding:32px 20px 0;max-width:1100px;margin:0 auto}
+.header-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.header-icon{font-size:28px;line-height:1}
+.header-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--accent-dim);padding:3px 8px;border-radius:5px}
+.header h1{font-size:clamp(24px,5vw,36px);font-weight:900;letter-spacing:-.02em;line-height:1.15;margin-bottom:4px}
+.header h1 em{font-family:var(--mono);font-weight:400;font-size:.42em;color:var(--faint);display:block;margin-top:3px;letter-spacing:0}
+.header-desc{color:var(--muted);font-size:13px;max-width:60ch;margin-bottom:16px}
 
-  --accent: #a078f0;
-  --accent-dim: #a078f020;
-  --correct: #40c880;
-  --wrong: #e05050;
+.tabs{display:flex;gap:4px;padding:0 20px;max-width:1100px;margin:0 auto 20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{font-family:var(--sans);font-size:12px;font-weight:600;padding:9px 14px;border:none;background:transparent;color:var(--muted);border-radius:9px;cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--surface2);color:var(--ink)}
+.tab.active{background:var(--accent);color:#fff}
 
-  --mono: 'Space Mono', ui-monospace, monospace;
-  --sans: 'Noto Sans KR', system-ui, sans-serif;
-  --r: 14px;
-  --r2: 10px;
-}
+.panel{display:none;max-width:1100px;margin:0 auto;padding:0 20px 60px}
+.panel.active{display:block}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--sans);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-}
+/* Decision steps */
+.decision-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+.decision-step::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.decision-step.c-basal::before{background:var(--basal)}
+.decision-step.c-radial::before{background:var(--radial)}
+.decision-step.c-proto::before{background:var(--proto-loph)}
+.decision-step.c-accent::before{background:var(--accent)}
+.step-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.step-num{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);background:var(--accent-dim);width:36px;height:36px;display:grid;place-items:center;border-radius:9px;flex-shrink:0}
+.step-question{font-size:16px;font-weight:700}
+.step-connector{display:flex;justify-content:center;margin:-6px 0}
+.step-connector-line{width:2px;height:24px;background:var(--border2)}
+.step-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.step-option{border:2px solid var(--border);border-radius:var(--r2);padding:14px}
+.step-option.g-basal{border-left:3px solid var(--basal)}
+.step-option.g-radial{border-left:3px solid var(--radial)}
+.step-option.g-proto{border-left:3px solid var(--proto-loph)}
+.step-option.g-deutero{border-left:3px solid var(--deutero)}
+.step-option.g-loph{border-left:3px solid var(--proto-loph)}
+.step-option.g-ecdy{border-left:3px solid var(--proto-ecdy)}
+.step-option.g-continue{border-left:3px solid var(--accent);background:var(--accent-dim)}
+.so-answer{font-size:12px;font-weight:700;margin-bottom:3px}
+.so-result{font-size:13px;font-weight:800;margin-bottom:2px}
+.so-sci{font-family:var(--mono);font-style:italic;font-size:10px;color:var(--faint);margin-bottom:5px}
+.so-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.so-examples{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.ex-chip{font-size:10px;padding:2px 7px;border-radius:5px;background:var(--surface3);color:var(--ink)}
+.so-leads{margin-top:6px;font-size:10px;color:var(--accent);font-weight:600}
 
-/* ─── Header ─── */
-.header {
-  padding: 40px 24px 0;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.header-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.header-icon {
-  font-size: 32px;
-  line-height: 1;
-}
-.header-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: var(--accent-dim);
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-.header h1 {
-  font-size: clamp(26px, 5vw, 40px);
-  font-weight: 900;
-  letter-spacing: -.02em;
-  line-height: 1.15;
-  margin-bottom: 6px;
-}
-.header h1 span {
-  font-family: var(--mono);
-  font-weight: 400;
-  font-style: italic;
-  font-size: .45em;
-  color: var(--faint);
-  display: block;
-  margin-top: 4px;
-  letter-spacing: 0;
-}
-.header-desc {
-  color: var(--muted);
-  font-size: 14px;
-  max-width: 62ch;
-  margin-bottom: 20px;
-}
+/* Phylum cards */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.phylum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
+.phylum-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.phylum-card.g-basal::before{background:var(--basal)}
+.phylum-card.g-radial::before{background:var(--radial)}
+.phylum-card.g-proto-loph::before{background:var(--proto-loph)}
+.phylum-card.g-proto-ecdy::before{background:var(--proto-ecdy)}
+.phylum-card.g-deutero::before{background:var(--deutero)}
+.pc-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.pc-emoji{font-size:32px;line-height:1;flex-shrink:0}
+.pc-titles{flex:1;min-width:0}
+.pc-rank{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.pc-name{font-size:17px;font-weight:800;letter-spacing:-.01em}
+.pc-sci{font-family:var(--mono);font-style:italic;font-size:11px;color:var(--faint)}
+.pc-path{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px}
+.pc-path-chip{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--muted)}
+.pc-path-arrow{color:var(--faint);font-size:9px;display:flex;align-items:center}
+.pc-section{margin-bottom:10px}
+.pc-section:last-child{margin-bottom:0}
+.pc-slabel{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.pc-traits{display:flex;flex-wrap:wrap;gap:4px}
+.pc-trait{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--ink)}
+.pc-trait.key{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600}
+.pc-examples{display:flex;flex-wrap:wrap;gap:4px}
+.pc-example{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface3);color:var(--ink)}
+.pc-classes{display:flex;flex-wrap:wrap;gap:5px}
+.pc-class{flex:1 1 100px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 9px}
+.pc-class b{font-size:12px}
+.pc-class i{font-family:var(--mono);font-size:9px;color:var(--faint);display:block}
+.pc-class small{font-size:10px;color:var(--muted)}
 
-/* ─── Tab navigation ─── */
-.tabs {
-  display: flex;
-  gap: 4px;
-  padding: 0 24px;
-  max-width: 1100px;
-  margin: 0 auto 24px;
-  overflow-x: auto;
-}
-.tab {
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 10px 18px;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 10px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: .15s;
-}
-.tab:hover { background: var(--surface2); color: var(--ink); }
-.tab.active { background: var(--accent); color: #fff; }
-.tab .tab-emoji { margin-right: 6px; }
+/* Quiz */
+.quiz-wrapper{max-width:600px;margin:0 auto}
+.quiz-progress{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.quiz-bar{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.quiz-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.quiz-ptext{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.quiz-score{display:flex;gap:14px;margin-bottom:16px;font-family:var(--mono);font-size:12px}
+.qs-correct{color:var(--correct)}
+.qs-wrong{color:var(--wrong)}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px 20px;margin-bottom:14px}
+.quiz-cat{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.quiz-q{font-size:16px;font-weight:700;margin-bottom:16px;line-height:1.4}
+.quiz-opts{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{font-family:var(--sans);font-size:13px;text-align:left;padding:12px 14px;border:2px solid var(--border);border-radius:var(--r2);background:var(--surface);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:9px}
+.quiz-opt:hover:not(.answered){border-color:var(--accent);background:var(--accent-dim)}
+.opt-key{font-family:var(--mono);font-size:11px;font-weight:700;width:24px;height:24px;display:grid;place-items:center;border-radius:5px;background:var(--surface2);color:var(--muted);flex-shrink:0}
+.quiz-opt.correct-answer{border-color:var(--correct);background:#40c88015}
+.quiz-opt.correct-answer .opt-key{background:var(--correct);color:#fff}
+.quiz-opt.wrong-answer{border-color:var(--wrong);background:#e0505015}
+.quiz-opt.wrong-answer .opt-key{background:var(--wrong);color:#fff}
+.quiz-opt.answered{cursor:default;pointer-events:none}
+.quiz-opt.dimmed{opacity:.4}
+.quiz-explain{margin-top:14px;padding:12px 14px;background:var(--surface2);border-radius:var(--r2);font-size:12px;color:var(--muted);line-height:1.5;display:none}
+.quiz-explain.show{display:block}
+.quiz-explain b{color:var(--ink);font-weight:600}
+.quiz-next{font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 20px;border:none;border-radius:var(--r2);background:var(--accent);color:#fff;cursor:pointer;display:none;margin-top:14px}
+.quiz-next.show{display:inline-block}
+.quiz-result{text-align:center;padding:40px 20px}
+.quiz-result-score{font-size:44px;font-weight:900;color:var(--accent);margin-bottom:6px}
+.quiz-result-text{font-size:15px;color:var(--muted);margin-bottom:20px}
+.quiz-restart{font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 20px;border:2px solid var(--accent);border-radius:var(--r2);background:transparent;color:var(--accent);cursor:pointer}
 
-/* ─── Panels ─── */
-.panel { display: none; max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
-.panel.active { display: block; }
+/* Cheat sheet */
+.cheat-section{margin-bottom:24px}
+.cheat-title{font-size:15px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.mnemonic-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--r2);padding:14px 16px;margin-bottom:10px}
+.mnemonic-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+.mnemonic-text{font-size:15px;font-weight:700;letter-spacing:.02em}
+.hl{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+.mnemonic-desc{font-size:11px;color:var(--muted);margin-top:3px}
+.mnemonic-desc b{color:var(--ink);font-weight:600}
 
-/* ═══════════════════════════════════════
-   PANEL 1: FLOWCHART — Decision Tree
-   ═══════════════════════════════════════ */
-.flow-container { position: relative; }
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.comp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px;text-align:center}
+.cc-label{font-size:10px;font-family:var(--mono);color:var(--faint);margin-bottom:3px}
+.cc-name{font-size:15px;font-weight:800;margin-bottom:5px}
+.cc-key{font-size:12px;font-weight:600;padding:3px 10px;border-radius:5px;display:inline-block}
+.comp-card.proto .cc-key{background:#e05a8a20;color:var(--proto-loph)}
+.comp-card.deutero .cc-key{background:#4a9aee20;color:var(--deutero)}
+.cc-desc{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
 
-.flow-level {
-  display: flex;
-  align-items: stretch;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-.flow-question {
-  flex: 0 0 auto;
-  width: 200px;
-  min-width: 160px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-.flow-q-num {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .12em;
-  color: var(--faint);
-  margin-bottom: 4px;
-}
-.flow-q-text {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r);
-  padding: 14px 16px;
-  width: 100%;
-}
-.flow-q-text::before {
-  content: "◆ ";
-  color: var(--accent);
-}
-.flow-branches {
-  flex: 1 1 auto;
-  display: flex;
-  gap: 12px;
-  min-width: 0;
-}
-.flow-branch {
-  flex: 1 1 0;
-  min-width: 0;
-}
-.flow-answer {
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-  padding: 6px 12px;
-  border-radius: 8px 8px 0 0;
-  letter-spacing: .02em;
-}
-.flow-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 0 0 var(--r) var(--r);
-  padding: 14px;
-  height: calc(100% - 32px);
-}
-.flow-card-name {
-  font-size: 15px;
-  font-weight: 800;
-  margin-bottom: 2px;
-}
-.flow-card-sci {
-  font-family: var(--mono);
-  font-style: italic;
-  font-size: 11px;
-  color: var(--faint);
-  margin-bottom: 8px;
-}
-.flow-card-traits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-.flow-trait {
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--muted);
-}
-.flow-card-examples {
-  font-size: 12px;
-  color: var(--muted);
-}
-.flow-card-examples b {
-  color: var(--faint);
-  font-weight: 600;
-  font-size: 10px;
-  font-family: var(--mono);
-  letter-spacing: .08em;
-}
-.flow-arrow {
-  display: flex;
-  justify-content: center;
-  padding: 4px 0;
-  color: var(--faint);
-  font-size: 18px;
-}
+.cheat-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;font-size:12px}
+.cheat-table th{background:var(--surface2);font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted);font-family:var(--mono)}
+.cheat-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.cheat-table tr:last-child td{border-bottom:none}
+.col-name{font-weight:700;white-space:nowrap}
+.col-sci{font-family:var(--mono);font-style:italic;font-size:10px;color:var(--faint)}
+.col-emoji{font-size:16px;text-align:center}
+.hi-cell{background:var(--accent-dim);font-weight:600;color:var(--accent)}
+.col-group{width:8px;padding:0 4px}
+.group-bar{width:3px;height:100%;min-height:18px;border-radius:2px;display:block}
+.panel-intro{font-size:12px;color:var(--muted);margin-bottom:16px}
 
-/* decision step-by-step */
-.decision-step {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 24px;
-  margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
-}
-.decision-step::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-}
-.decision-step[data-color="basal"]::before { background: var(--basal); }
-.decision-step[data-color="radial"]::before { background: var(--radial); }
-.decision-step[data-color="proto-loph"]::before { background: var(--proto-loph); }
-.decision-step[data-color="proto-ecdy"]::before { background: var(--proto-ecdy); }
-.decision-step[data-color="deutero"]::before { background: var(--deutero); }
-.decision-step[data-color="accent"]::before { background: var(--accent); }
-
-.step-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-.step-num {
-  font-family: var(--mono);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--accent);
-  background: var(--accent-dim);
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  flex-shrink: 0;
-}
-.step-question {
-  font-size: 17px;
-  font-weight: 700;
-}
-.step-connector {
-  display: flex;
-  justify-content: center;
-  padding: 0 0 0 0;
-  margin: -8px 0;
-  position: relative;
-  z-index: 1;
-}
-.step-connector-line {
-  width: 2px;
-  height: 28px;
-  background: var(--border2);
-}
-.step-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.step-option {
-  border: 2px solid var(--border);
-  border-radius: var(--r2);
-  padding: 16px;
-  cursor: default;
-  transition: .15s;
-  position: relative;
-}
-.step-option:hover {
-  border-color: var(--border2);
-  background: var(--surface2);
-}
-.step-option-answer {
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.step-option-answer .arrow-icon {
-  font-size: 11px;
-  color: var(--faint);
-}
-.step-option-result {
-  font-size: 14px;
-  font-weight: 800;
-  margin-bottom: 2px;
-}
-.step-option-sci {
-  font-family: var(--mono);
-  font-style: italic;
-  font-size: 11px;
-  color: var(--faint);
-  margin-bottom: 6px;
-}
-.step-option-desc {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.5;
-}
-.step-option-examples {
-  margin-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.step-option-examples .ex-chip {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 5px;
-  background: var(--surface3);
-  color: var(--ink);
-}
-.option-leads {
-  margin-top: 8px;
-  font-size: 11px;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-/* color accents for options */
-.step-option[data-g="basal"] { border-left: 3px solid var(--basal); }
-.step-option[data-g="radial"] { border-left: 3px solid var(--radial); }
-.step-option[data-g="proto"] { border-left: 3px solid var(--proto-loph); }
-.step-option[data-g="deutero"] { border-left: 3px solid var(--deutero); }
-.step-option[data-g="loph"] { border-left: 3px solid var(--proto-loph); }
-.step-option[data-g="ecdy"] { border-left: 3px solid var(--proto-ecdy); }
-.step-option[data-g="continue"] {
-  border-left: 3px solid var(--accent);
-  background: var(--accent-dim);
-}
-
-/* ═══════════════════════════════════════
-   PANEL 2: CARDS — Phylum Overview
-   ═══════════════════════════════════════ */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 14px;
-}
-.phylum-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-  transition: .2s;
-}
-.phylum-card:hover {
-  border-color: var(--border2);
-  transform: translateY(-2px);
-}
-.phylum-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-}
-.phylum-card[data-group="basal"]::before { background: var(--basal); }
-.phylum-card[data-group="radial"]::before { background: var(--radial); }
-.phylum-card[data-group="proto-loph"]::before { background: var(--proto-loph); }
-.phylum-card[data-group="proto-ecdy"]::before { background: var(--proto-ecdy); }
-.phylum-card[data-group="deutero"]::before { background: var(--deutero); }
-
-.pc-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-.pc-emoji {
-  font-size: 36px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-.pc-titles { flex: 1; min-width: 0; }
-.pc-rank {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-.pc-name {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -.01em;
-}
-.pc-sci {
-  font-family: var(--mono);
-  font-style: italic;
-  font-size: 12px;
-  color: var(--faint);
-}
-.pc-path {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 12px;
-}
-.pc-path-chip {
-  font-size: 10px;
-  font-family: var(--mono);
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: var(--surface2);
-  color: var(--muted);
-  letter-spacing: .03em;
-}
-.pc-path-arrow {
-  color: var(--faint);
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-}
-.pc-section {
-  margin-bottom: 12px;
-}
-.pc-section:last-child { margin-bottom: 0; }
-.pc-section-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--faint);
-  margin-bottom: 6px;
-}
-.pc-traits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-.pc-trait {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 7px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--ink);
-}
-.pc-trait.key-trait {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-  color: var(--accent);
-  font-weight: 600;
-}
-.pc-examples {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-.pc-example {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 7px;
-  background: var(--surface3);
-  color: var(--ink);
-}
-.pc-classes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.pc-class {
-  flex: 1 1 120px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-}
-.pc-class-name { font-size: 13px; font-weight: 700; }
-.pc-class-sci { font-family: var(--mono); font-style: italic; font-size: 10px; color: var(--faint); }
-.pc-class-ex { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-/* ═══════════════════════════════════════
-   PANEL 3: QUIZ — Active Recall
-   ═══════════════════════════════════════ */
-.quiz-wrapper {
-  max-width: 640px;
-  margin: 0 auto;
-}
-.quiz-progress {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.quiz-progress-bar {
-  flex: 1;
-  height: 6px;
-  background: var(--surface2);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.quiz-progress-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width .3s;
-}
-.quiz-progress-text {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-}
-.quiz-score {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.quiz-score-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 13px;
-}
-.quiz-score-item.correct { color: var(--correct); }
-.quiz-score-item.wrong { color: var(--wrong); }
-
-.quiz-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 28px 24px;
-  margin-bottom: 16px;
-}
-.quiz-category {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 12px;
-}
-.quiz-q {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  line-height: 1.4;
-}
-.quiz-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.quiz-opt {
-  font-family: var(--sans);
-  font-size: 14px;
-  text-align: left;
-  padding: 14px 16px;
-  border: 2px solid var(--border);
-  border-radius: var(--r2);
-  background: var(--surface);
-  color: var(--ink);
-  cursor: pointer;
-  transition: .15s;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.quiz-opt:hover:not(.answered) {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-}
-.quiz-opt .opt-key {
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 700;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: var(--surface2);
-  color: var(--muted);
-  flex-shrink: 0;
-}
-.quiz-opt.correct-answer {
-  border-color: var(--correct);
-  background: #40c88015;
-}
-.quiz-opt.correct-answer .opt-key {
-  background: var(--correct);
-  color: #fff;
-}
-.quiz-opt.wrong-answer {
-  border-color: var(--wrong);
-  background: #e0505015;
-}
-.quiz-opt.wrong-answer .opt-key {
-  background: var(--wrong);
-  color: #fff;
-}
-.quiz-opt.answered { cursor: default; pointer-events: none; }
-.quiz-opt.dimmed { opacity: .4; }
-
-.quiz-explanation {
-  margin-top: 16px;
-  padding: 14px 16px;
-  background: var(--surface2);
-  border-radius: var(--r2);
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-  display: none;
-}
-.quiz-explanation.show { display: block; }
-.quiz-explanation b { color: var(--ink); font-weight: 600; }
-
-.quiz-next {
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 12px 24px;
-  border: none;
-  border-radius: var(--r2);
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-  display: none;
-  margin-top: 16px;
-}
-.quiz-next.show { display: inline-block; }
-.quiz-next:hover { filter: brightness(1.1); }
-
-.quiz-result {
-  text-align: center;
-  padding: 40px 20px;
-}
-.quiz-result-score {
-  font-size: 48px;
-  font-weight: 900;
-  color: var(--accent);
-  margin-bottom: 8px;
-}
-.quiz-result-text {
-  font-size: 16px;
-  color: var(--muted);
-  margin-bottom: 24px;
-}
-.quiz-restart {
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 12px 24px;
-  border: 2px solid var(--accent);
-  border-radius: var(--r2);
-  background: transparent;
-  color: var(--accent);
-  cursor: pointer;
-}
-.quiz-restart:hover { background: var(--accent-dim); }
-
-/* ═══════════════════════════════════════
-   PANEL 4: CHEAT SHEET
-   ═══════════════════════════════════════ */
-.cheat-section {
-  margin-bottom: 28px;
-}
-.cheat-title {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.cheat-title .ct-icon {
-  font-size: 18px;
-}
-.cheat-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  overflow: hidden;
-  font-size: 13px;
-}
-.cheat-table th {
-  background: var(--surface2);
-  font-weight: 700;
-  text-align: left;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--muted);
-  font-family: var(--mono);
-  letter-spacing: .05em;
-}
-.cheat-table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
-}
-.cheat-table tr:last-child td { border-bottom: none; }
-.cheat-table .col-name {
-  font-weight: 700;
-  white-space: nowrap;
-}
-.cheat-table .col-sci {
-  font-family: var(--mono);
-  font-style: italic;
-  font-size: 11px;
-  color: var(--faint);
-}
-.cheat-table .col-emoji { font-size: 18px; text-align: center; }
-.cheat-table .highlight-cell {
-  background: var(--accent-dim);
-  font-weight: 600;
-  color: var(--accent);
-}
-.cheat-table .col-group {
-  width: 10px;
-  padding: 0 6px;
-}
-.cheat-table .group-bar {
-  width: 4px;
-  height: 100%;
-  min-height: 20px;
-  border-radius: 2px;
-  display: block;
-}
-
-.mnemonic-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--r2);
-  padding: 16px 18px;
-  margin-bottom: 12px;
-}
-.mnemonic-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 6px;
-}
-.mnemonic-text {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: .03em;
-}
-.mnemonic-text .char-hl {
-  color: var(--accent);
-  text-decoration: underline;
-  text-decoration-color: var(--accent);
-  text-underline-offset: 3px;
-}
-.mnemonic-desc {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-.comparison-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.comparison-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r2);
-  padding: 16px;
-  text-align: center;
-}
-.comparison-card .cc-label {
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--faint);
-  margin-bottom: 4px;
-}
-.comparison-card .cc-name {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 6px;
-}
-.comparison-card .cc-key {
-  font-size: 13px;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 6px;
-  display: inline-block;
-}
-.comparison-card.proto .cc-key { background: #e05a8a20; color: var(--proto-loph); }
-.comparison-card.deutero .cc-key { background: #4a9aee20; color: var(--deutero); }
-.comparison-card .cc-desc {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 8px;
-  line-height: 1.5;
-}
-.comparison-vs {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--faint);
-  margin: -4px 0;
-  position: relative;
-  z-index: 1;
-}
-
-@media (max-width: 640px) {
-  .header { padding: 28px 16px 0; }
-  .tabs { padding: 0 16px; }
-  .panel { padding: 0 16px 60px; }
-  .step-options { grid-template-columns: 1fr; }
-  .cards-grid { grid-template-columns: 1fr; }
-  .comparison-grid { grid-template-columns: 1fr; }
-  .tab { padding: 8px 14px; font-size: 12px; }
+@media(max-width:640px){
+  .header{padding:24px 14px 0}
+  .tabs{padding:0 14px}
+  .panel{padding:0 14px 50px}
+  .step-options{grid-template-columns:1fr}
+  .cards-grid{grid-template-columns:1fr}
+  .comp-grid{grid-template-columns:1fr}
+  .tab{padding:7px 12px;font-size:11px}
 }
 </style>
 </head>
@@ -882,669 +177,352 @@ body {
 <div class="header">
   <div class="header-top">
     <span class="header-icon">🧬</span>
-    <span class="header-label">BIOLOGY · TAXONOMY</span>
+    <span class="header-label">BIOLOGY</span>
   </div>
-  <h1>동물계 분류 마스터<span>Kingdom Animalia · interactive study tool</span></h1>
-  <p class="header-desc">분기 질문을 따라가며 동물 분류를 체계적으로 익히자. 검색표 → 문(門) 카드 → 퀴즈 → 요약표 순서로 반복하면 완벽 암기.</p>
+  <h1>동물계 분류 마스터<em>Kingdom Animalia · interactive study tool</em></h1>
+  <p class="header-desc">검색표 → 문 카드 → 퀴즈 → 요약표 순서로 반복하면 완벽 암기.</p>
 </div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="flow"><span class="tab-emoji">🔀</span>검색표</button>
-  <button class="tab" data-tab="cards"><span class="tab-emoji">🃏</span>문(門) 카드</button>
-  <button class="tab" data-tab="quiz"><span class="tab-emoji">🧠</span>퀴즈</button>
-  <button class="tab" data-tab="cheat"><span class="tab-emoji">📋</span>요약표</button>
+  <button class="tab active" onclick="switchTab('flow')">🔀 검색표</button>
+  <button class="tab" onclick="switchTab('cards')">🃏 문 카드</button>
+  <button class="tab" onclick="switchTab('quiz')">🧠 퀴즈</button>
+  <button class="tab" onclick="switchTab('cheat')">📋 요약표</button>
 </div>
 
-<!-- ═══ PANEL: FLOW ═══ -->
-<div class="panel active" id="panel-flow"></div>
+<!-- ════════ FLOW ════════ -->
+<div class="panel active" id="panel-flow">
+  <p class="panel-intro">동물계에서 출발, 4번의 분기 질문으로 9개 문(門)을 찾아간다.</p>
 
-<!-- ═══ PANEL: CARDS ═══ -->
-<div class="panel" id="panel-cards"></div>
+  <div class="decision-step c-basal">
+    <div class="step-header"><div class="step-num">1</div><div class="step-question">배엽이 형성되는가?</div></div>
+    <div class="step-options">
+      <div class="step-option g-basal">
+        <div class="so-answer">X — 형성 안 됨</div>
+        <div class="so-result">해면동물문</div>
+        <div class="so-sci">Porifera</div>
+        <div class="so-desc">가장 원시적. 무대칭, 무배엽. 깃세포로 여과섭식.</div>
+        <div class="so-examples"><span class="ex-chip">해면(스펀지)</span></div>
+      </div>
+      <div class="step-option g-continue">
+        <div class="so-answer">O — 형성됨</div>
+        <div class="so-result">→ 다음 질문으로</div>
+        <div class="so-desc">배엽이 분화 → 조직·기관 형성 가능.</div>
+        <div class="so-leads">→ ② 대칭성은?</div>
+      </div>
+    </div>
+  </div>
+  <div class="step-connector"><div class="step-connector-line"></div></div>
 
-<!-- ═══ PANEL: QUIZ ═══ -->
-<div class="panel" id="panel-quiz"></div>
+  <div class="decision-step c-radial">
+    <div class="step-header"><div class="step-num">2</div><div class="step-question">몸의 대칭성은?</div></div>
+    <div class="step-options">
+      <div class="step-option g-radial">
+        <div class="so-answer">방사대칭 · 2배엽</div>
+        <div class="so-result">자포동물문</div>
+        <div class="so-sci">Cnidaria</div>
+        <div class="so-desc">자세포 보유. 강장(소화강) 존재. 입 = 항문.</div>
+        <div class="so-examples"><span class="ex-chip">히드라</span><span class="ex-chip">해파리</span><span class="ex-chip">산호</span><span class="ex-chip">말미잘</span></div>
+      </div>
+      <div class="step-option g-continue">
+        <div class="so-answer">좌우대칭 · 3배엽</div>
+        <div class="so-result">→ 다음 질문으로</div>
+        <div class="so-desc">3배엽(외·중·내배엽) 분화 → 복잡한 기관계.</div>
+        <div class="so-leads">→ ③ 원구의 운명은?</div>
+      </div>
+    </div>
+  </div>
+  <div class="step-connector"><div class="step-connector-line"></div></div>
 
-<!-- ═══ PANEL: CHEAT ═══ -->
-<div class="panel" id="panel-cheat"></div>
+  <div class="decision-step c-accent">
+    <div class="step-header"><div class="step-num">3</div><div class="step-question">원구(原口)는 무엇이 되는가?</div></div>
+    <div class="step-options">
+      <div class="step-option g-proto">
+        <div class="so-answer">원구 → 입</div>
+        <div class="so-result">선구동물</div>
+        <div class="so-sci">Protostomia</div>
+        <div class="so-desc">원구가 그대로 입이 됨. 촉수담륜 + 탈피동물로 나뉨.</div>
+        <div class="so-leads">→ ④ 발생·형태 계통은?</div>
+      </div>
+      <div class="step-option g-deutero">
+        <div class="so-answer">원구 → 항문</div>
+        <div class="so-result">후구동물</div>
+        <div class="so-sci">Deuterostomia</div>
+        <div class="so-desc">원구가 항문이 되고, 입은 나중에 새로 형성됨.</div>
+        <div class="so-examples"><span class="ex-chip">극피동물</span><span class="ex-chip">척삭동물</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="step-connector"><div class="step-connector-line"></div></div>
+
+  <div class="decision-step c-proto">
+    <div class="step-header"><div class="step-num">4</div><div class="step-question">선구동물의 발생·형태 계통은?</div></div>
+    <div class="step-options">
+      <div class="step-option g-loph">
+        <div class="so-answer">담륜자 유생 · 촉수관</div>
+        <div class="so-result">촉수담륜동물</div>
+        <div class="so-sci">Lophotrochozoa</div>
+        <div class="so-desc">편형동물 · 연체동물 · 환형동물이 포함.</div>
+        <div class="so-examples"><span class="ex-chip">플라나리아</span><span class="ex-chip">달팽이</span><span class="ex-chip">지렁이</span></div>
+      </div>
+      <div class="step-option g-ecdy">
+        <div class="so-answer">큐티클 탈피</div>
+        <div class="so-result">탈피동물</div>
+        <div class="so-sci">Ecdysozoa</div>
+        <div class="so-desc">외골격(큐티클)을 주기적으로 벗고 성장.</div>
+        <div class="so-examples"><span class="ex-chip">회충</span><span class="ex-chip">곤충</span><span class="ex-chip">거미</span><span class="ex-chip">갑각류</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ CARDS ════════ -->
+<div class="panel" id="panel-cards">
+  <p class="panel-intro">각 문(門)의 핵심 정보를 한 장의 카드로. 분류 경로와 결정 형질을 함께 확인.</p>
+  <div class="cards-grid">
+
+    <div class="phylum-card g-basal">
+      <div class="pc-header"><div class="pc-emoji">🧽</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">해면동물문</div><div class="pc-sci">Porifera</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">배엽 형성 X</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">배엽 형성 X (가장 원시)</span><span class="pc-trait">무대칭</span><span class="pc-trait">무배엽</span><span class="pc-trait">유생: 유영 / 성체: 고착</span><span class="pc-trait">깃세포로 여과섭식</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">해면(스펀지)</span></div></div>
+    </div>
+
+    <div class="phylum-card g-radial">
+      <div class="pc-header"><div class="pc-emoji">🪸</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">자포동물문</div><div class="pc-sci">Cnidaria</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">배엽 형성 O</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">방사대칭 · 2배엽</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">방사대칭 · 2배엽</span><span class="pc-trait">자세포(쏘는 세포)</span><span class="pc-trait">강장(소화강) 존재</span><span class="pc-trait">입 = 항문 (하나)</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">히드라</span><span class="pc-example">해파리</span><span class="pc-example">산호</span><span class="pc-example">말미잘</span></div></div>
+    </div>
+
+    <div class="phylum-card g-proto-loph">
+      <div class="pc-header"><div class="pc-emoji">🪱</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">편형동물문</div><div class="pc-sci">Platyhelminthes</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">좌우대칭·3배엽</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">선구</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">촉수담륜</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">납작 · 항문 X</span><span class="pc-trait">몸이 납작</span><span class="pc-trait">입 O · 항문 X</span><span class="pc-trait">피부호흡</span><span class="pc-trait">기생 또는 자유생활</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">촌충</span><span class="pc-example">간흡충</span><span class="pc-example">플라나리아</span></div></div>
+    </div>
+
+    <div class="phylum-card g-proto-loph">
+      <div class="pc-header"><div class="pc-emoji">🐙</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">연체동물문</div><div class="pc-sci">Mollusca</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">좌우대칭·3배엽</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">선구</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">촉수담륜</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">외투막 · 패각</span><span class="pc-trait">체절 X</span><span class="pc-trait">외투막</span><span class="pc-trait">패각(대부분)</span><span class="pc-trait">순환계·소화계 발달</span><span class="pc-trait">아가미호흡</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">하위 강(綱)</div><div class="pc-classes"><div class="pc-class"><b>복족강</b><i>Gastropoda</i><small>달팽이 · 전복</small></div><div class="pc-class"><b>이매패강</b><i>Bivalvia</i><small>조개류</small></div><div class="pc-class"><b>두족강</b><i>Cephalopoda</i><small>문어 · 오징어</small></div></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">달팽이</span><span class="pc-example">조개</span><span class="pc-example">문어</span><span class="pc-example">오징어</span></div></div>
+    </div>
+
+    <div class="phylum-card g-proto-loph">
+      <div class="pc-header"><div class="pc-emoji">🪱</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">환형동물문</div><div class="pc-sci">Annelida</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">좌우대칭·3배엽</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">선구</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">촉수담륜</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">고리 체절 · 폐쇄혈관</span><span class="pc-trait">고리모양 체절</span><span class="pc-trait">폐쇄혈관계</span><span class="pc-trait">긴 소화관</span><span class="pc-trait">아가미/피부호흡</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">갯지렁이</span><span class="pc-example">지렁이</span><span class="pc-example">거머리</span></div></div>
+    </div>
+
+    <div class="phylum-card g-proto-ecdy">
+      <div class="pc-header"><div class="pc-emoji">🦠</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">선형동물문</div><div class="pc-sci">Nematoda</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">좌우대칭·3배엽</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">선구</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">탈피</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">큐티클 탈피 · 체절 X</span><span class="pc-trait">체절 X</span><span class="pc-trait">큐티클</span><span class="pc-trait">탈피</span><span class="pc-trait">순환계 X</span><span class="pc-trait">호흡계 X</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">회충</span><span class="pc-example">요충</span><span class="pc-example">선충</span></div></div>
+    </div>
+
+    <div class="phylum-card g-proto-ecdy">
+      <div class="pc-header"><div class="pc-emoji">🦀</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">절지동물문</div><div class="pc-sci">Arthropoda</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">좌우대칭·3배엽</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">선구</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">탈피</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">관절다리 · 외골격 · 탈피</span><span class="pc-trait">체절 O</span><span class="pc-trait">관절다리</span><span class="pc-trait">키틴질 외골격</span><span class="pc-trait">개방혈관계</span><span class="pc-trait">동물종의 약 80%</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">곤충</span><span class="pc-example">거미</span><span class="pc-example">갑각류</span><span class="pc-example">다지류</span></div></div>
+    </div>
+
+    <div class="phylum-card g-deutero">
+      <div class="pc-header"><div class="pc-emoji">⭐</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">극피동물문</div><div class="pc-sci">Echinodermata</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">좌우대칭·3배엽</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">후구</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">수관계 · 관족</span><span class="pc-trait">유생: 좌우대칭</span><span class="pc-trait">성체: 방사대칭(5방사)</span><span class="pc-trait">수관계</span><span class="pc-trait">관족</span><span class="pc-trait">내골격(석회질)</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">불가사리</span><span class="pc-example">해삼</span><span class="pc-example">성게</span></div></div>
+    </div>
+
+    <div class="phylum-card g-deutero">
+      <div class="pc-header"><div class="pc-emoji">🐟</div><div class="pc-titles"><div class="pc-rank">문</div><div class="pc-name">척삭동물문</div><div class="pc-sci">Chordata</div></div></div>
+      <div class="pc-path"><span class="pc-path-chip">동물계</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">좌우대칭·3배엽</span><span class="pc-path-arrow">→</span><span class="pc-path-chip">후구</span></div>
+      <div class="pc-section"><div class="pc-slabel">핵심 형질</div><div class="pc-traits"><span class="pc-trait key">척삭 · 등쪽 신경관</span><span class="pc-trait">척삭</span><span class="pc-trait">등쪽 신경다발</span><span class="pc-trait">인두틈(아가미틈)</span><span class="pc-trait">항문 뒤 꼬리</span></div></div>
+      <div class="pc-section"><div class="pc-slabel">하위 분류</div><div class="pc-classes"><div class="pc-class"><b>두삭동물(아문)</b><small>창고기</small></div><div class="pc-class"><b>미삭동물(아문)</b><small>멍게 · 미더덕</small></div><div class="pc-class"><b>척추동물(아문)</b><small>어류~포유류</small></div></div></div>
+      <div class="pc-section"><div class="pc-slabel">대표 예시</div><div class="pc-examples"><span class="pc-example">창고기</span><span class="pc-example">멍게</span><span class="pc-example">어류</span><span class="pc-example">양서류</span><span class="pc-example">파충류</span><span class="pc-example">조류</span><span class="pc-example">포유류</span></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════ QUIZ ════════ -->
+<div class="panel" id="panel-quiz">
+  <div class="quiz-wrapper" id="quiz-root"></div>
+</div>
+
+<!-- ════════ CHEAT ════════ -->
+<div class="panel" id="panel-cheat">
+
+  <div class="cheat-section">
+    <div class="cheat-title">🧠 암기 도우미</div>
+    <div class="mnemonic-box">
+      <div class="mnemonic-label">분류 순서 (기저→후구)</div>
+      <div class="mnemonic-text"><span class="hl">해</span>면 → <span class="hl">자</span>포 → <span class="hl">편</span>형 → <span class="hl">연</span>체 → <span class="hl">환</span>형 → <span class="hl">선</span>형 → <span class="hl">절</span>지 → <span class="hl">극</span>피 → <span class="hl">척</span>삭</div>
+      <div class="mnemonic-desc">"<b>해자편연환 선절극척</b>"</div>
+    </div>
+    <div class="mnemonic-box">
+      <div class="mnemonic-label">선구 vs 후구</div>
+      <div class="mnemonic-text"><span class="hl">선</span>구 = 원구 → <span class="hl">입</span> / <span class="hl">후</span>구 = 원구 → <span class="hl">항문</span></div>
+      <div class="mnemonic-desc">"선(먼저)입, 후(나중)항" — 먼저 만들어진 구멍이 입이면 선구, 항문이면 후구</div>
+    </div>
+    <div class="mnemonic-box">
+      <div class="mnemonic-label">촉수담륜 vs 탈피</div>
+      <div class="mnemonic-text">촉수담륜 = <span class="hl">편</span> · <span class="hl">연</span> · <span class="hl">환</span> / 탈피 = <span class="hl">선</span> · <span class="hl">절</span></div>
+      <div class="mnemonic-desc">"편연환은 담(배에 담고), 선절은 탈(옷을 벗는다)"</div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">⚔️ 선구 vs 후구</div>
+    <div class="comp-grid">
+      <div class="comp-card proto">
+        <div class="cc-label">PROTOSTOMIA</div>
+        <div class="cc-name">선구동물</div>
+        <div class="cc-key">원구 → 입</div>
+        <div class="cc-desc">편형 · 연체 · 환형 · 선형 · 절지<br>(촉수담륜 + 탈피)</div>
+      </div>
+      <div class="comp-card deutero">
+        <div class="cc-label">DEUTEROSTOMIA</div>
+        <div class="cc-name">후구동물</div>
+        <div class="cc-key">원구 → 항문</div>
+        <div class="cc-desc">극피 · 척삭<br>(불가사리~포유류)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">📊 전체 비교표</div>
+    <div style="overflow-x:auto">
+    <table class="cheat-table">
+      <thead><tr><th></th><th></th><th>문</th><th>학명</th><th>계통</th><th>대칭</th><th>배엽</th><th>체절</th><th>혈관계</th><th>키워드</th><th>예시</th></tr></thead>
+      <tbody>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--basal)"></span></td><td class="col-emoji">🧽</td><td class="col-name">해면</td><td class="col-sci">Porifera</td><td>기저</td><td class="hi-cell">무대칭</td><td class="hi-cell">무배엽</td><td>X</td><td>X</td><td>깃세포, 여과섭식</td><td>해면</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--radial)"></span></td><td class="col-emoji">🪸</td><td class="col-name">자포</td><td class="col-sci">Cnidaria</td><td>기저</td><td class="hi-cell">방사</td><td class="hi-cell">2배엽</td><td>X</td><td>X</td><td>자세포, 입=항문</td><td>해파리, 산호</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--proto-loph)"></span></td><td class="col-emoji">🪱</td><td class="col-name">편형</td><td class="col-sci">Platyhelminthes</td><td>선구·담륜</td><td>좌우</td><td>3배엽</td><td>X</td><td>X</td><td>납작, 항문X</td><td>촌충, 플라나리아</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--proto-loph)"></span></td><td class="col-emoji">🐙</td><td class="col-name">연체</td><td class="col-sci">Mollusca</td><td>선구·담륜</td><td>좌우</td><td>3배엽</td><td>X</td><td>개방</td><td>외투막, 패각</td><td>달팽이, 문어</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--proto-loph)"></span></td><td class="col-emoji">🪱</td><td class="col-name">환형</td><td class="col-sci">Annelida</td><td>선구·담륜</td><td>좌우</td><td>3배엽</td><td class="hi-cell">O</td><td class="hi-cell">폐쇄</td><td>고리 체절</td><td>지렁이, 거머리</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--proto-ecdy)"></span></td><td class="col-emoji">🦠</td><td class="col-name">선형</td><td class="col-sci">Nematoda</td><td>선구·탈피</td><td>좌우</td><td>3배엽</td><td>X</td><td>X</td><td>큐티클, 탈피</td><td>회충, 요충</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--proto-ecdy)"></span></td><td class="col-emoji">🦀</td><td class="col-name">절지</td><td class="col-sci">Arthropoda</td><td>선구·탈피</td><td>좌우</td><td>3배엽</td><td class="hi-cell">O</td><td class="hi-cell">개방</td><td>외골격, 관절다리</td><td>곤충, 거미</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--deutero)"></span></td><td class="col-emoji">⭐</td><td class="col-name">극피</td><td class="col-sci">Echinodermata</td><td>후구</td><td>방사*</td><td>3배엽</td><td>X</td><td>—</td><td>수관계, 관족</td><td>불가사리, 성게</td></tr>
+        <tr><td class="col-group"><span class="group-bar" style="background:var(--deutero)"></span></td><td class="col-emoji">🐟</td><td class="col-name">척삭</td><td class="col-sci">Chordata</td><td>후구</td><td>좌우</td><td>3배엽</td><td>O</td><td>폐쇄</td><td>척삭, 신경관</td><td>멍게~포유류</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size:10px;color:var(--faint);margin-top:5px;font-family:var(--mono)">* 극피: 유생=좌우, 성체=방사(5방사)</p>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">🔑 자주 헷갈리는 포인트</div>
+    <div style="overflow-x:auto">
+    <table class="cheat-table">
+      <thead><tr><th>비교</th><th>답</th><th>주의</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">입=항문 vs 항문X</td><td>자포 = 입=항문 / 편형 = 항문 없음</td><td>둘 다 불완전 소화, 이유 다름</td></tr>
+        <tr><td class="col-name">체절 O?</td><td>환형 · 절지 · 척삭(척추)</td><td>연체동물은 체절 X</td></tr>
+        <tr><td class="col-name">폐쇄혈관계</td><td>환형 · 척삭(척추)</td><td>절지=개방, 연체=개방</td></tr>
+        <tr><td class="col-name">탈피하는 문</td><td>선형 · 절지</td><td>큐티클 보유 → 탈피동물</td></tr>
+        <tr><td class="col-name">극피=후구?</td><td>맞다! 불가사리도 후구</td><td>성체 방사대칭이라 헷갈림</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ─────────── DATA ─────────── */
-const PHYLA = [
-  {
-    name:"해면동물문", sci:"Porifera", emoji:"🧽", group:"basal", rank:"문",
-    path:["동물계","배엽 형성 X"],
-    keyTrait:"배엽 형성 X (가장 원시)",
-    traits:["무대칭","무배엽","유생: 유영 / 성체: 고착","깃세포로 여과섭식"],
-    examples:["해면(스펀지)"]
-  },
-  {
-    name:"자포동물문", sci:"Cnidaria", emoji:"🪸", group:"radial", rank:"문",
-    path:["동물계","배엽 형성 O","방사대칭 · 2배엽"],
-    keyTrait:"방사대칭 · 2배엽",
-    traits:["자세포(쏘는 세포)","강장(소화강) 존재","입 = 항문 (하나)"],
-    examples:["히드라","해파리","산호","말미잘"]
-  },
-  {
-    name:"편형동물문", sci:"Platyhelminthes", emoji:"🪱", group:"proto-loph", rank:"문",
-    path:["동물계","배엽 형성 O","좌우대칭 · 3배엽","선구동물","촉수담륜동물"],
-    keyTrait:"납작 · 항문 X",
-    traits:["몸이 납작","입 O · 항문 X","피부호흡","기생 또는 자유생활"],
-    examples:["촌충","간흡충","플라나리아"]
-  },
-  {
-    name:"연체동물문", sci:"Mollusca", emoji:"🐙", group:"proto-loph", rank:"문",
-    path:["동물계","배엽 형성 O","좌우대칭 · 3배엽","선구동물","촉수담륜동물"],
-    keyTrait:"외투막 · 패각",
-    traits:["체절 X","외투막","패각(대부분)","순환계·소화계 발달","아가미호흡"],
-    examples:["달팽이","조개","문어","오징어"],
-    classes:[
-      {cn:"복족강", cs:"Gastropoda", ce:"달팽이 · 전복"},
-      {cn:"이매패강", cs:"Bivalvia", ce:"조개류"},
-      {cn:"두족강", cs:"Cephalopoda", ce:"문어 · 오징어"}
-    ]
-  },
-  {
-    name:"환형동물문", sci:"Annelida", emoji:"🪱", group:"proto-loph", rank:"문",
-    path:["동물계","배엽 형성 O","좌우대칭 · 3배엽","선구동물","촉수담륜동물"],
-    keyTrait:"고리 체절 · 폐쇄혈관",
-    traits:["고리모양 체절","폐쇄혈관계","긴 소화관","아가미/피부호흡"],
-    examples:["갯지렁이","지렁이","거머리"]
-  },
-  {
-    name:"선형동물문", sci:"Nematoda", emoji:"🦠", group:"proto-ecdy", rank:"문",
-    path:["동물계","배엽 형성 O","좌우대칭 · 3배엽","선구동물","탈피동물"],
-    keyTrait:"큐티클 탈피 · 체절 X",
-    traits:["체절 X","큐티클","탈피","순환계 X","호흡계 X"],
-    examples:["회충","요충","선충"]
-  },
-  {
-    name:"절지동물문", sci:"Arthropoda", emoji:"🦀", group:"proto-ecdy", rank:"문",
-    path:["동물계","배엽 형성 O","좌우대칭 · 3배엽","선구동물","탈피동물"],
-    keyTrait:"관절다리 · 외골격 · 탈피",
-    traits:["체절 O","관절다리","키틴질 외골격","탈피","개방혈관계","동물종의 약 80%"],
-    examples:["곤충","거미","갑각류","다지류"]
-  },
-  {
-    name:"극피동물문", sci:"Echinodermata", emoji:"⭐", group:"deutero", rank:"문",
-    path:["동물계","배엽 형성 O","좌우대칭 · 3배엽","후구동물"],
-    keyTrait:"수관계 · 관족",
-    traits:["유생: 좌우대칭","성체: 방사대칭(5방사)","수관계","관족","내골격(석회질)"],
-    examples:["불가사리","해삼","성게"]
-  },
-  {
-    name:"척삭동물문", sci:"Chordata", emoji:"🐟", group:"deutero", rank:"문",
-    path:["동물계","배엽 형성 O","좌우대칭 · 3배엽","후구동물"],
-    keyTrait:"척삭 · 등쪽 신경관",
-    traits:["척삭","등쪽 신경다발","인두틈(아가미틈)","항문 뒤 꼬리"],
-    examples:["창고기","멍게","어류","양서류","파충류","조류","포유류"],
-    subgroups:[
-      {name:"두삭동물(아문)", ex:"창고기"},
-      {name:"미삭동물(아문)", ex:"멍게 · 미더덕"},
-      {name:"척추동물(아문)", ex:"어류~포유류"},
-    ]
-  }
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('panel-'+id).classList.add('active');
+  var tabs=document.querySelectorAll('.tab');
+  var map={flow:0,cards:1,quiz:2,cheat:3};
+  if(map[id]!==undefined)tabs[map[id]].classList.add('active');
+}
+
+/* Quiz — minimal JS needed */
+var QUIZ_BANK=[
+  {cat:"분기 질문",q:"배엽이 형성되지 않는 동물문은?",o:["해면동물문","자포동물문","편형동물문","극피동물문"],c:0,e:"해면동물문(Porifera)은 배엽 형성이 일어나지 않는 가장 원시적인 동물문이다."},
+  {cat:"분기 질문",q:"방사대칭이면서 2배엽인 동물문은?",o:["해면동물문","자포동물문","극피동물문","편형동물문"],c:1,e:"자포동물문(Cnidaria)은 방사대칭 + 2배엽. 극피동물은 후구동물이고 유생은 좌우대칭."},
+  {cat:"선구 vs 후구",q:"원구(原口)가 '입'이 되는 동물군은?",o:["후구동물","선구동물","방사대칭동물","무배엽동물"],c:1,e:"선구동물(Protostomia): 원구 → 입. 후구동물: 원구 → 항문."},
+  {cat:"선구 vs 후구",q:"원구(原口)가 '항문'이 되는 동물군은?",o:["선구동물","후구동물","탈피동물","촉수담륜동물"],c:1,e:"후구동물(Deuterostomia): 원구 → 항문, 입은 나중에 새로 형성."},
+  {cat:"형질",q:"자세포(쏘는 세포)를 가진 동물문은?",o:["해면동물문","편형동물문","자포동물문","환형동물문"],c:2,e:"자포동물문(Cnidaria)의 '자포'가 바로 자세포를 의미."},
+  {cat:"형질",q:"폐쇄혈관계를 가진 동물문은?",o:["절지동물문","환형동물문","선형동물문","연체동물문"],c:1,e:"환형동물문(Annelida)은 폐쇄혈관계. 절지동물은 개방혈관계."},
+  {cat:"형질",q:"수관계와 관족을 가진 동물문은?",o:["척삭동물문","자포동물문","극피동물문","연체동물문"],c:2,e:"극피동물문(Echinodermata)은 수관계와 관족을 이용해 이동."},
+  {cat:"형질",q:"키틴질 외골격 + 관절다리를 가진 동물문은?",o:["환형동물문","절지동물문","극피동물문","척삭동물문"],c:1,e:"절지동물문(Arthropoda)은 키틴질 외골격과 관절다리가 특징."},
+  {cat:"분류",q:"촉수담륜동물에 포함되지 않는 것은?",o:["편형동물문","연체동물문","환형동물문","절지동물문"],c:3,e:"절지동물문은 탈피동물(Ecdysozoa). 촉수담륜 = 편형·연체·환형."},
+  {cat:"분류",q:"탈피동물에 해당하는 것은?",o:["편형+연체","환형+자포","선형+절지","극피+척삭"],c:2,e:"탈피동물(Ecdysozoa) = 선형동물문 + 절지동물문."},
+  {cat:"분류",q:"후구동물에 속하는 문의 조합은?",o:["해면+자포","편형+환형","선형+절지","극피+척삭"],c:3,e:"후구동물 = 극피동물문 + 척삭동물문."},
+  {cat:"예시",q:"플라나리아가 속하는 동물문은?",o:["환형동물문","편형동물문","선형동물문","자포동물문"],c:1,e:"플라나리아는 편형동물문(Platyhelminthes)에 속하는 자유생활 편형동물."},
+  {cat:"예시",q:"문어와 오징어가 속하는 강(綱)은?",o:["복족강","이매패강","두족강","갑각강"],c:2,e:"문어·오징어는 연체동물문의 두족강(Cephalopoda)."},
+  {cat:"비교",q:"절지동물문의 혈관계는?",o:["폐쇄혈관계","개방혈관계","혈관계 없음","수관계"],c:1,e:"절지동물은 개방혈관계, 환형동물은 폐쇄혈관계."},
+  {cat:"비교",q:"척삭동물의 4대 특징이 아닌 것은?",o:["척삭","등쪽 신경다발","자세포","항문 뒤 꼬리"],c:2,e:"자세포는 자포동물 특징. 척삭 4대: 척삭, 등쪽 신경다발, 인두틈, 항문 뒤 꼬리."},
+  {cat:"비교",q:"해면동물의 섭식 방법은?",o:["자세포로 사냥","깃세포로 여과섭식","관족으로 포획","외투막으로 흡수"],c:1,e:"해면동물은 깃세포(choanocyte)로 여과섭식."},
+  {cat:"형질",q:"선형동물문에 없는 기관계는?",o:["순환계+호흡계","소화계+신경계","순환계+소화계","호흡계+신경계"],c:0,e:"선형동물문(Nematoda)은 순환계와 호흡계가 모두 없다."},
+  {cat:"형질",q:"극피동물의 유생과 성체 대칭성은?",o:["유생:방사/성체:좌우","유생:좌우/성체:방사","둘 다 방사","둘 다 좌우"],c:1,e:"극피동물은 유생=좌우대칭, 성체=방사대칭(5방사)."},
+  {cat:"분류",q:"동물 종의 약 80%를 차지하는 문은?",o:["연체동물문","척삭동물문","절지동물문","선형동물문"],c:2,e:"절지동물문은 곤충·거미·갑각류 등 전체 동물 종의 약 80%."},
+  {cat:"비교",q:"입과 항문이 하나(같음)인 문은?",o:["자포동물문","편형동물문","환형동물문","척삭동물문"],c:0,e:"자포동물문은 입=항문(하나). 편형동물문은 입O 항문X."}
 ];
 
-const DECISIONS = [
-  {
-    num: "1", question: "배엽이 형성되는가?",
-    color: "basal",
-    options: [
-      { answer: "X — 형성 안 됨", result: "해면동물문", sci: "Porifera", g: "basal",
-        desc: "가장 원시적. 무대칭, 무배엽. 깃세포로 여과섭식.", examples: ["해면(스펀지)"] },
-      { answer: "O — 형성됨", result: "→ 다음 질문으로", g: "continue",
-        desc: "배엽이 분화 → 조직·기관 형성 가능.", leads: "② 대칭성은?" }
-    ]
-  },
-  {
-    num: "2", question: "몸의 대칭성은?",
-    color: "radial",
-    options: [
-      { answer: "방사대칭 · 2배엽", result: "자포동물문", sci: "Cnidaria", g: "radial",
-        desc: "자세포 보유. 강장(소화강) 존재. 입 = 항문.", examples: ["히드라","해파리","산호","말미잘"] },
-      { answer: "좌우대칭 · 3배엽", result: "→ 다음 질문으로", g: "continue",
-        desc: "3배엽(외배엽·중배엽·내배엽) 분화 → 복잡한 기관계.", leads: "③ 원구의 운명은?" }
-    ]
-  },
-  {
-    num: "3", question: "원구(原口)는 무엇이 되는가?",
-    color: "accent",
-    options: [
-      { answer: "원구 → 입", result: "선구동물", sci: "Protostomia", g: "proto",
-        desc: "원구가 그대로 입이 됨. 촉수담륜동물 + 탈피동물로 나뉨.", leads: "④ 발생·형태 계통은?" },
-      { answer: "원구 → 항문", result: "후구동물", sci: "Deuterostomia", g: "deutero",
-        desc: "원구가 항문이 되고, 입은 나중에 새로 형성됨.", examples: ["극피동물","척삭동물"] }
-    ]
-  },
-  {
-    num: "4", question: "선구동물의 발생·형태 계통은?",
-    color: "proto-loph",
-    options: [
-      { answer: "담륜자 유생 · 촉수관", result: "촉수담륜동물", sci: "Lophotrochozoa", g: "loph",
-        desc: "편형동물 · 연체동물 · 환형동물이 포함.", examples: ["플라나리아","달팽이","지렁이"] },
-      { answer: "큐티클 탈피", result: "탈피동물", sci: "Ecdysozoa", g: "ecdy",
-        desc: "외골격(큐티클)을 주기적으로 벗고 성장. 선형동물 · 절지동물 포함.", examples: ["회충","곤충","거미","갑각류"] }
-    ]
+var quizState={qs:[],ci:0,sc:0,wr:0,ans:false};
+var quizRoot=document.getElementById('quiz-root');
+
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t}return b}
+
+function startQuiz(){
+  quizState.qs=shuffle(QUIZ_BANK).slice(0,10);
+  quizState.ci=0;quizState.sc=0;quizState.wr=0;quizState.ans=false;
+  renderQuiz();
+}
+
+function renderQuiz(){
+  var s=quizState;
+  if(s.ci>=s.qs.length){renderResult();return}
+  var q=s.qs[s.ci];
+  var keys=['A','B','C','D'];
+  var pct=Math.round((s.ci/s.qs.length)*100);
+  var h='<div class="quiz-progress"><div class="quiz-bar"><div class="quiz-fill" style="width:'+pct+'%"></div></div><div class="quiz-ptext">'+(s.ci+1)+' / '+s.qs.length+'</div></div>';
+  h+='<div class="quiz-score"><span class="qs-correct" id="qs-c">✓ '+s.sc+'</span><span class="qs-wrong" id="qs-w">✗ '+s.wr+'</span></div>';
+  h+='<div class="quiz-card"><div class="quiz-cat">'+q.cat+'</div><div class="quiz-q">'+q.q+'</div><div class="quiz-opts">';
+  for(var i=0;i<q.o.length;i++){
+    h+='<button class="quiz-opt" onclick="pickAnswer('+i+')" id="qo'+i+'"><span class="opt-key">'+keys[i]+'</span><span>'+q.o[i]+'</span></button>';
   }
-];
+  h+='</div><div class="quiz-explain" id="qexp">'+q.e+'</div>';
+  h+='<button class="quiz-next" id="qnext" onclick="nextQ()">'+(s.ci<s.qs.length-1?'다음 문제 →':'결과 보기')+'</button></div>';
+  quizRoot.innerHTML=h;
+  s.ans=false;
+}
 
-const QUIZ_BANK = [
-  { category:"분기 질문", q:"배엽이 형성되지 않는 동물문은?",
-    options:["해면동물문","자포동물문","편형동물문","극피동물문"], correct:0,
-    explain:"해면동물문(Porifera)은 배엽 형성이 일어나지 않는 가장 원시적인 동물문이다." },
-  { category:"분기 질문", q:"방사대칭이면서 2배엽인 동물문은?",
-    options:["해면동물문","자포동물문","극피동물문","편형동물문"], correct:1,
-    explain:"자포동물문(Cnidaria)은 방사대칭 + 2배엽이다. 극피동물은 후구동물이고, 유생은 좌우대칭이다." },
-  { category:"선구 vs 후구", q:"원구(原口)가 '입'이 되는 동물군은?",
-    options:["후구동물","선구동물","방사대칭동물","무배엽동물"], correct:1,
-    explain:"선구동물(Protostomia): 원구 → 입. 후구동물(Deuterostomia): 원구 → 항문." },
-  { category:"선구 vs 후구", q:"원구(原口)가 '항문'이 되는 동물군은?",
-    options:["선구동물","후구동물","탈피동물","촉수담륜동물"], correct:1,
-    explain:"후구동물(Deuterostomia): 원구 → 항문, 입은 나중에 새로 형성된다." },
-  { category:"형질", q:"자세포(쏘는 세포)를 가진 동물문은?",
-    options:["해면동물문","편형동물문","자포동물문","환형동물문"], correct:2,
-    explain:"자포동물문(Cnidaria)의 '자포'가 바로 자세포를 의미한다." },
-  { category:"형질", q:"폐쇄혈관계를 가진 동물문은?",
-    options:["절지동물문","환형동물문","선형동물문","연체동물문"], correct:1,
-    explain:"환형동물문(Annelida)은 폐쇄혈관계를 가진다. 절지동물은 개방혈관계이다." },
-  { category:"형질", q:"수관계와 관족을 가진 동물문은?",
-    options:["척삭동물문","자포동물문","극피동물문","연체동물문"], correct:2,
-    explain:"극피동물문(Echinodermata)은 수관계(water vascular system)와 관족을 이용해 이동한다." },
-  { category:"형질", q:"키틴질 외골격 + 관절다리를 가진 동물문은?",
-    options:["환형동물문","절지동물문","극피동물문","척삭동물문"], correct:1,
-    explain:"절지동물문(Arthropoda)은 키틴질 외골격과 관절다리(jointed appendages)가 특징이다." },
-  { category:"분류", q:"촉수담륜동물에 포함되지 않는 것은?",
-    options:["편형동물문","연체동물문","환형동물문","절지동물문"], correct:3,
-    explain:"절지동물문은 '탈피동물(Ecdysozoa)'에 속한다. 촉수담륜동물에는 편형·연체·환형동물이 포함." },
-  { category:"분류", q:"탈피동물에 해당하는 것은?",
-    options:["편형동물문 + 연체동물문","환형동물문 + 자포동물문","선형동물문 + 절지동물문","극피동물문 + 척삭동물문"], correct:2,
-    explain:"탈피동물(Ecdysozoa) = 선형동물문 + 절지동물문. 큐티클을 탈피하며 성장한다." },
-  { category:"분류", q:"후구동물에 속하는 문의 조합은?",
-    options:["해면동물 + 자포동물","편형동물 + 환형동물","선형동물 + 절지동물","극피동물 + 척삭동물"], correct:3,
-    explain:"후구동물(Deuterostomia) = 극피동물문 + 척삭동물문." },
-  { category:"예시", q:"플라나리아가 속하는 동물문은?",
-    options:["환형동물문","편형동물문","선형동물문","자포동물문"], correct:1,
-    explain:"플라나리아는 편형동물문(Platyhelminthes)에 속하는 자유생활 편형동물이다." },
-  { category:"예시", q:"문어와 오징어가 속하는 강(綱)은?",
-    options:["복족강","이매패강","두족강","갑각강"], correct:2,
-    explain:"문어·오징어는 연체동물문의 두족강(Cephalopoda)에 속한다." },
-  { category:"비교", q:"절지동물문의 혈관계는?",
-    options:["폐쇄혈관계","개방혈관계","혈관계 없음","수관계"], correct:1,
-    explain:"절지동물은 개방혈관계, 환형동물은 폐쇄혈관계를 가진다." },
-  { category:"비교", q:"척삭동물의 4대 특징이 아닌 것은?",
-    options:["척삭","등쪽 신경다발","자세포","항문 뒤 꼬리"], correct:2,
-    explain:"자세포는 자포동물의 특징. 척삭동물의 4대 특징: 척삭, 등쪽 신경다발, 인두틈, 항문 뒤 꼬리." },
-  { category:"비교", q:"해면동물의 섭식 방법은?",
-    options:["자세포로 사냥","깃세포로 여과섭식","관족으로 포획","외투막으로 흡수"], correct:1,
-    explain:"해면동물은 깃세포(choanocyte)를 이용하여 물 속의 유기물을 여과섭식한다." },
-  { category:"형질", q:"선형동물문에 없는 기관계를 모두 고르면?",
-    options:["순환계 + 호흡계","소화계 + 신경계","순환계 + 소화계","호흡계 + 신경계"], correct:0,
-    explain:"선형동물문(Nematoda)은 순환계와 호흡계가 모두 없다." },
-  { category:"형질", q:"극피동물의 유생과 성체의 대칭성은?",
-    options:["유생: 방사 / 성체: 좌우","유생: 좌우 / 성체: 방사","둘 다 방사대칭","둘 다 좌우대칭"], correct:1,
-    explain:"극피동물은 유생 때는 좌우대칭이지만, 성체가 되면 방사대칭(5방사)으로 변한다." },
-  { category:"분류", q:"동물 종의 약 80%를 차지하는 동물문은?",
-    options:["연체동물문","척삭동물문","절지동물문","선형동물문"], correct:2,
-    explain:"절지동물문(Arthropoda)은 곤충, 거미, 갑각류 등을 포함하여 전체 동물 종의 약 80%를 차지한다." },
-  { category:"비교", q:"입과 항문이 하나(같음)인 동물문은?",
-    options:["자포동물문","편형동물문","환형동물문","척삭동물문"], correct:0,
-    explain:"자포동물문은 입 = 항문 (하나). 편형동물문은 입은 있지만 항문이 없다." },
-];
-
-/* ─────────── TAB SWITCHING ─────────── */
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-  });
-});
-
-/* ─────────── FLOW PANEL ─────────── */
-(function buildFlow() {
-  const el = document.getElementById('panel-flow');
-  let html = `<p style="font-size:13px;color:var(--muted);margin-bottom:20px;">동물계(Animalia)에서 출발하여 4번의 분기 질문으로 9개 문(門)을 찾아간다.</p>`;
-
-  DECISIONS.forEach((d, i) => {
-    html += `
-    <div class="decision-step" data-color="${d.color}">
-      <div class="step-header">
-        <div class="step-num">${d.num}</div>
-        <div class="step-question">${d.question}</div>
-      </div>
-      <div class="step-options">
-        ${d.options.map(o => `
-          <div class="step-option" data-g="${o.g}">
-            <div class="step-option-answer">${o.answer}</div>
-            <div class="step-option-result">${o.result}</div>
-            ${o.sci ? `<div class="step-option-sci">${o.sci}</div>` : ''}
-            <div class="step-option-desc">${o.desc}</div>
-            ${o.examples ? `<div class="step-option-examples">${o.examples.map(e => `<span class="ex-chip">${e}</span>`).join('')}</div>` : ''}
-            ${o.leads ? `<div class="option-leads">→ ${o.leads}</div>` : ''}
-          </div>
-        `).join('')}
-      </div>
-    </div>`;
-    if (i < DECISIONS.length - 1) {
-      html += `<div class="step-connector"><div class="step-connector-line"></div></div>`;
-    }
-  });
-
-  el.innerHTML = html;
-})();
-
-/* ─────────── CARDS PANEL ─────────── */
-(function buildCards() {
-  const el = document.getElementById('panel-cards');
-  let html = `<p style="font-size:13px;color:var(--muted);margin-bottom:20px;">각 문(門)의 핵심 정보를 한 장의 카드로. 분류 경로와 결정 형질을 함께 확인.</p>`;
-  html += '<div class="cards-grid">';
-
-  PHYLA.forEach(p => {
-    const pathHtml = p.path.map((s, i) =>
-      `<span class="pc-path-chip">${s}</span>${i < p.path.length - 1 ? '<span class="pc-path-arrow">→</span>' : ''}`
-    ).join('');
-
-    html += `
-    <div class="phylum-card" data-group="${p.group}">
-      <div class="pc-header">
-        <div class="pc-emoji">${p.emoji}</div>
-        <div class="pc-titles">
-          <div class="pc-rank">${p.rank}</div>
-          <div class="pc-name">${p.name}</div>
-          <div class="pc-sci">${p.sci}</div>
-        </div>
-      </div>
-      <div class="pc-path">${pathHtml}</div>
-      <div class="pc-section">
-        <div class="pc-section-label">핵심 형질</div>
-        <div class="pc-traits">
-          <span class="pc-trait key-trait">${p.keyTrait}</span>
-          ${p.traits.map(t => `<span class="pc-trait">${t}</span>`).join('')}
-        </div>
-      </div>
-      ${p.classes ? `
-      <div class="pc-section">
-        <div class="pc-section-label">하위 강(綱)</div>
-        <div class="pc-classes">
-          ${p.classes.map(c => `<div class="pc-class"><div class="pc-class-name">${c.cn}</div><div class="pc-class-sci">${c.cs}</div><div class="pc-class-ex">${c.ce}</div></div>`).join('')}
-        </div>
-      </div>` : ''}
-      ${p.subgroups ? `
-      <div class="pc-section">
-        <div class="pc-section-label">하위 분류</div>
-        <div class="pc-classes">
-          ${p.subgroups.map(s => `<div class="pc-class"><div class="pc-class-name">${s.name}</div><div class="pc-class-ex">${s.ex}</div></div>`).join('')}
-        </div>
-      </div>` : ''}
-      <div class="pc-section">
-        <div class="pc-section-label">대표 예시</div>
-        <div class="pc-examples">
-          ${p.examples.map(e => `<span class="pc-example">${e}</span>`).join('')}
-        </div>
-      </div>
-    </div>`;
-  });
-
-  html += '</div>';
-  el.innerHTML = html;
-})();
-
-/* ─────────── QUIZ PANEL ─────────── */
-(function buildQuiz() {
-  const el = document.getElementById('panel-quiz');
-  const wrapper = document.createElement('div');
-  wrapper.className = 'quiz-wrapper';
-  el.appendChild(wrapper);
-
-  let questions = [], currentQ = 0, score = 0, wrong = 0, answered = false;
-
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
+function pickAnswer(idx){
+  var s=quizState;if(s.ans)return;s.ans=true;
+  var q=s.qs[s.ci];
+  var correct=idx===q.c;
+  if(correct)s.sc++;else s.wr++;
+  for(var i=0;i<q.o.length;i++){
+    var el=document.getElementById('qo'+i);
+    el.classList.add('answered');
+    if(i===q.c)el.classList.add('correct-answer');
+    else if(i===idx&&!correct)el.classList.add('wrong-answer');
+    else el.classList.add('dimmed');
   }
+  document.getElementById('qexp').classList.add('show');
+  document.getElementById('qnext').classList.add('show');
+  document.getElementById('qs-c').textContent='✓ '+s.sc;
+  document.getElementById('qs-w').textContent='✗ '+s.wr;
+}
 
-  function startQuiz() {
-    questions = shuffle(QUIZ_BANK).slice(0, 10);
-    currentQ = 0; score = 0; wrong = 0; answered = false;
-    renderQ();
-  }
+function nextQ(){quizState.ci++;renderQuiz()}
 
-  function renderQ() {
-    if (currentQ >= questions.length) {
-      renderResult();
-      return;
-    }
-    const q = questions[currentQ];
-    const keys = ['A','B','C','D'];
-    const pct = Math.round((currentQ / questions.length) * 100);
+function renderResult(){
+  var s=quizState;
+  var pct=Math.round((s.sc/s.qs.length)*100);
+  var msg=pct>=90?'완벽해! 🎉':pct>=70?'거의 다 외웠어! 💪':pct>=50?'조금만 더! 📚':'다시 복습하자! 🔄';
+  quizRoot.innerHTML='<div class="quiz-result"><div class="quiz-result-score">'+s.sc+' / '+s.qs.length+'</div><div class="quiz-result-text">'+pct+'% 정답 · '+msg+'</div><button class="quiz-restart" onclick="startQuiz()">다시 도전 🔁</button></div>';
+}
 
-    wrapper.innerHTML = `
-      <div class="quiz-progress">
-        <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
-        <div class="quiz-progress-text">${currentQ + 1} / ${questions.length}</div>
-      </div>
-      <div class="quiz-score">
-        <div class="quiz-score-item correct">✓ ${score}</div>
-        <div class="quiz-score-item wrong">✗ ${wrong}</div>
-      </div>
-      <div class="quiz-card">
-        <div class="quiz-category">${q.category}</div>
-        <div class="quiz-q">${q.q}</div>
-        <div class="quiz-options">
-          ${q.options.map((o, i) => `
-            <button class="quiz-opt" data-idx="${i}">
-              <span class="opt-key">${keys[i]}</span>
-              <span>${o}</span>
-            </button>
-          `).join('')}
-        </div>
-        <div class="quiz-explanation" id="quiz-explain">${q.explain}</div>
-        <button class="quiz-next" id="quiz-next-btn">${currentQ < questions.length - 1 ? '다음 문제 →' : '결과 보기'}</button>
-      </div>
-    `;
-
-    answered = false;
-    wrapper.querySelectorAll('.quiz-opt').forEach(btn => {
-      btn.addEventListener('click', () => handleAnswer(btn, q));
-    });
-    document.getElementById('quiz-next-btn').addEventListener('click', () => {
-      currentQ++;
-      renderQ();
-    });
-  }
-
-  function handleAnswer(btn, q) {
-    if (answered) return;
-    answered = true;
-    const idx = parseInt(btn.dataset.idx);
-    const isCorrect = idx === q.correct;
-    if (isCorrect) score++; else wrong++;
-
-    wrapper.querySelectorAll('.quiz-opt').forEach((b, i) => {
-      b.classList.add('answered');
-      if (i === q.correct) b.classList.add('correct-answer');
-      else if (i === idx && !isCorrect) b.classList.add('wrong-answer');
-      else b.classList.add('dimmed');
-    });
-
-    document.getElementById('quiz-explain').classList.add('show');
-    document.getElementById('quiz-next-btn').classList.add('show');
-
-    // update score display
-    wrapper.querySelector('.quiz-score-item.correct').textContent = `✓ ${score}`;
-    wrapper.querySelector('.quiz-score-item.wrong').textContent = `✗ ${wrong}`;
-  }
-
-  function renderResult() {
-    const pct = Math.round((score / questions.length) * 100);
-    let msg = pct >= 90 ? '완벽해! 🎉' : pct >= 70 ? '거의 다 외웠어! 💪' : pct >= 50 ? '조금만 더! 📚' : '다시 복습하자! 🔄';
-    wrapper.innerHTML = `
-      <div class="quiz-result">
-        <div class="quiz-result-score">${score} / ${questions.length}</div>
-        <div class="quiz-result-text">${pct}% 정답 · ${msg}</div>
-        <button class="quiz-restart" id="quiz-restart">다시 도전 🔁</button>
-      </div>
-    `;
-    document.getElementById('quiz-restart').addEventListener('click', startQuiz);
-  }
-
-  startQuiz();
-})();
-
-/* ─────────── CHEAT SHEET PANEL ─────────── */
-(function buildCheat() {
-  const el = document.getElementById('panel-cheat');
-
-  const groupColor = g => ({
-    'basal':'var(--basal)','radial':'var(--radial)','proto-loph':'var(--proto-loph)',
-    'proto-ecdy':'var(--proto-ecdy)','deutero':'var(--deutero)'
-  }[g] || 'var(--faint)');
-
-  el.innerHTML = `
-    <div class="cheat-section">
-      <div class="cheat-title"><span class="ct-icon">🧠</span>암기 도우미</div>
-      <div class="mnemonic-box">
-        <div class="mnemonic-label">분류 순서 (기저→후구)</div>
-        <div class="mnemonic-text">
-          <span class="char-hl">해</span>면 →
-          <span class="char-hl">자</span>포 →
-          <span class="char-hl">편</span>형 →
-          <span class="char-hl">연</span>체 →
-          <span class="char-hl">환</span>형 →
-          <span class="char-hl">선</span>형 →
-          <span class="char-hl">절</span>지 →
-          <span class="char-hl">극</span>피 →
-          <span class="char-hl">척</span>삭
-        </div>
-        <div class="mnemonic-desc">
-          "<b>해자편연환 선절극척</b>" — 해자 편연환이 선절 극(에서) 척(추를 잡는다)
-        </div>
-      </div>
-      <div class="mnemonic-box">
-        <div class="mnemonic-label">선구 vs 후구</div>
-        <div class="mnemonic-text">
-          <span class="char-hl">선</span>구 = 원구 → <span class="char-hl">입</span> &nbsp;/&nbsp;
-          <span class="char-hl">후</span>구 = 원구 → <span class="char-hl">항문</span>
-        </div>
-        <div class="mnemonic-desc">
-          "선(먼저)입, 후(나중)항" — 먼저 만들어진 구멍이 입이면 선구, 항문이면 후구
-        </div>
-      </div>
-      <div class="mnemonic-box">
-        <div class="mnemonic-label">촉수담륜 vs 탈피</div>
-        <div class="mnemonic-text">
-          촉수담륜 = <span class="char-hl">편</span> · <span class="char-hl">연</span> · <span class="char-hl">환</span> &nbsp;/&nbsp;
-          탈피 = <span class="char-hl">선</span> · <span class="char-hl">절</span>
-        </div>
-        <div class="mnemonic-desc">
-          "편연환은 담(배에 담고), 선절은 탈(옷을 벗는다)" — 납작한 것·말랑한 것·둥근 고리 vs 벗는 것들
-        </div>
-      </div>
-    </div>
-
-    <div class="cheat-section">
-      <div class="cheat-title"><span class="ct-icon">⚔️</span>핵심 비교: 선구 vs 후구</div>
-      <div class="comparison-grid">
-        <div class="comparison-card proto">
-          <div class="cc-label">PROTOSTOMIA</div>
-          <div class="cc-name">선구동물</div>
-          <div class="cc-key">원구 → 입</div>
-          <div class="cc-desc">편형 · 연체 · 환형 · 선형 · 절지<br>(촉수담륜 + 탈피)</div>
-        </div>
-        <div class="comparison-card deutero">
-          <div class="cc-label">DEUTEROSTOMIA</div>
-          <div class="cc-name">후구동물</div>
-          <div class="cc-key">원구 → 항문</div>
-          <div class="cc-desc">극피 · 척삭<br>(불가사리~포유류)</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="cheat-section">
-      <div class="cheat-title"><span class="ct-icon">📊</span>전체 비교표</div>
-      <div style="overflow-x:auto;">
-      <table class="cheat-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th></th>
-            <th>문(門)</th>
-            <th>학명</th>
-            <th>계통</th>
-            <th>대칭</th>
-            <th>배엽</th>
-            <th>체절</th>
-            <th>혈관계</th>
-            <th>핵심 키워드</th>
-            <th>대표 예시</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--basal)"></span></td>
-            <td class="col-emoji">🧽</td>
-            <td class="col-name">해면동물</td>
-            <td class="col-sci">Porifera</td>
-            <td>기저</td>
-            <td class="highlight-cell">무대칭</td>
-            <td class="highlight-cell">무배엽</td>
-            <td>X</td>
-            <td>X</td>
-            <td>깃세포, 여과섭식</td>
-            <td>해면</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--radial)"></span></td>
-            <td class="col-emoji">🪸</td>
-            <td class="col-name">자포동물</td>
-            <td class="col-sci">Cnidaria</td>
-            <td>기저</td>
-            <td class="highlight-cell">방사</td>
-            <td class="highlight-cell">2배엽</td>
-            <td>X</td>
-            <td>X</td>
-            <td>자세포, 입=항문</td>
-            <td>해파리, 산호</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--proto-loph)"></span></td>
-            <td class="col-emoji">🪱</td>
-            <td class="col-name">편형동물</td>
-            <td class="col-sci">Platyhelminthes</td>
-            <td>선구·담륜</td>
-            <td>좌우</td>
-            <td>3배엽</td>
-            <td>X</td>
-            <td>X</td>
-            <td>납작, 항문 X</td>
-            <td>촌충, 플라나리아</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--proto-loph)"></span></td>
-            <td class="col-emoji">🐙</td>
-            <td class="col-name">연체동물</td>
-            <td class="col-sci">Mollusca</td>
-            <td>선구·담륜</td>
-            <td>좌우</td>
-            <td>3배엽</td>
-            <td>X</td>
-            <td>개방</td>
-            <td>외투막, 패각</td>
-            <td>달팽이, 문어</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--proto-loph)"></span></td>
-            <td class="col-emoji">🪱</td>
-            <td class="col-name">환형동물</td>
-            <td class="col-sci">Annelida</td>
-            <td>선구·담륜</td>
-            <td>좌우</td>
-            <td>3배엽</td>
-            <td class="highlight-cell">O</td>
-            <td class="highlight-cell">폐쇄</td>
-            <td>고리 체절</td>
-            <td>지렁이, 거머리</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--proto-ecdy)"></span></td>
-            <td class="col-emoji">🦠</td>
-            <td class="col-name">선형동물</td>
-            <td class="col-sci">Nematoda</td>
-            <td>선구·탈피</td>
-            <td>좌우</td>
-            <td>3배엽</td>
-            <td>X</td>
-            <td>X</td>
-            <td>큐티클, 탈피</td>
-            <td>회충, 요충</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--proto-ecdy)"></span></td>
-            <td class="col-emoji">🦀</td>
-            <td class="col-name">절지동물</td>
-            <td class="col-sci">Arthropoda</td>
-            <td>선구·탈피</td>
-            <td>좌우</td>
-            <td>3배엽</td>
-            <td class="highlight-cell">O</td>
-            <td class="highlight-cell">개방</td>
-            <td>외골격, 관절다리, ~80%</td>
-            <td>곤충, 거미</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--deutero)"></span></td>
-            <td class="col-emoji">⭐</td>
-            <td class="col-name">극피동물</td>
-            <td class="col-sci">Echinodermata</td>
-            <td>후구</td>
-            <td>방사*</td>
-            <td>3배엽</td>
-            <td>X</td>
-            <td>—</td>
-            <td>수관계, 관족</td>
-            <td>불가사리, 성게</td>
-          </tr>
-          <tr>
-            <td class="col-group"><span class="group-bar" style="background:var(--deutero)"></span></td>
-            <td class="col-emoji">🐟</td>
-            <td class="col-name">척삭동물</td>
-            <td class="col-sci">Chordata</td>
-            <td>후구</td>
-            <td>좌우</td>
-            <td>3배엽</td>
-            <td>O</td>
-            <td>폐쇄</td>
-            <td>척삭, 등쪽 신경관</td>
-            <td>멍게, 어류~포유류</td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-      <p style="font-size:11px;color:var(--faint);margin-top:6px;font-family:var(--mono);">* 극피동물: 유생=좌우대칭, 성체=방사대칭(5방사)</p>
-    </div>
-
-    <div class="cheat-section">
-      <div class="cheat-title"><span class="ct-icon">🔑</span>자주 헷갈리는 포인트</div>
-      <div style="overflow-x:auto;">
-      <table class="cheat-table">
-        <thead><tr><th>비교 항목</th><th>답</th><th>주의</th></tr></thead>
-        <tbody>
-          <tr>
-            <td class="col-name">입=항문(하나) vs 항문 X</td>
-            <td>자포동물 = 입=항문 / 편형동물 = 항문 없음</td>
-            <td>둘 다 '불완전 소화'이지만 이유가 다르다</td>
-          </tr>
-          <tr>
-            <td class="col-name">체절 O인 문?</td>
-            <td>환형 · 절지 · 척삭(척추)</td>
-            <td>연체동물은 체절 X</td>
-          </tr>
-          <tr>
-            <td class="col-name">폐쇄혈관계</td>
-            <td>환형 · 척삭(척추)</td>
-            <td>절지 = 개방, 연체 = 개방(대부분)</td>
-          </tr>
-          <tr>
-            <td class="col-name">탈피를 하는 문</td>
-            <td>선형 · 절지</td>
-            <td>둘 다 큐티클 보유 → 탈피동물</td>
-          </tr>
-          <tr>
-            <td class="col-name">극피동물은 후구?</td>
-            <td>맞다! 불가사리도 후구동물</td>
-            <td>성체가 방사대칭이라 헷갈리지만 유생은 좌우대칭</td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-    </div>
-  `;
-})();
+startQuiz();
 </script>
 </body>
 </html>
